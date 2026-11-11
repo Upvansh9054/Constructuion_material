@@ -1,8 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.v1.deps import get_current_user
+from app.api.v1.deps import get_current_user, record_audit_log, require_contractor
+from app.core.constants import AuditAction, UserRole
 from app.core.database import get_db
 from app.models.site import DemolitionSite
 from app.models.user import User
@@ -15,10 +16,11 @@ router = APIRouter()
 @router.post("/", response_model=SiteResponse, status_code=status.HTTP_201_CREATED)
 async def create_demolition_site(
     site_in: SiteCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_contractor),
 ):
-    """Create a new demolition site survey project."""
+    """Create a new demolition site survey project (Contractor or Admin)."""
     # Check if site_code is already used
     existing = await db.execute(select(DemolitionSite).filter(DemolitionSite.site_code == site_in.site_code))
     if existing.scalar_one_or_none():
@@ -34,6 +36,17 @@ async def create_demolition_site(
     db.add(site)
     await db.commit()
     await db.refresh(site)
+
+    await record_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action=AuditAction.CREATE,
+        resource_type="DemolitionSite",
+        resource_id=site.id,
+        change_details={"site_code": site.site_code, "name": site.name, "city": site.city},
+        request=request,
+    )
+
     return site
 
 
@@ -93,8 +106,9 @@ async def get_site_details(
 async def update_site_details(
     site_id: str,
     site_update: SiteUpdate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_contractor),
 ):
     """Update demolition site metadata or status."""
     result = await db.execute(select(DemolitionSite).filter(DemolitionSite.id == site_id))
@@ -102,11 +116,56 @@ async def update_site_details(
     if not site:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site not found")
 
+    # Only project contractor or admin can update
+    if site.contractor_id != current_user.id and current_user.role not in [UserRole.ADMIN, "ADMIN"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this site.")
+
     update_data = site_update.model_dump(exclude_unset=True)
     for field, val in update_data.items():
         setattr(site, field, val)
 
     await db.commit()
     await db.refresh(site)
+
+    await record_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action=AuditAction.UPDATE,
+        resource_type="DemolitionSite",
+        resource_id=site.id,
+        change_details=update_data,
+        request=request,
+    )
+
     return site
 
+
+@router.delete("/{site_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_demolition_site(
+    site_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_contractor),
+):
+    """Delete a demolition site project (Contractor owner or Admin)."""
+    result = await db.execute(select(DemolitionSite).filter(DemolitionSite.id == site_id))
+    site = result.scalar_one_or_none()
+    if not site:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site not found")
+
+    if site.contractor_id != current_user.id and current_user.role not in [UserRole.ADMIN, "ADMIN"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this site.")
+
+    await record_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action=AuditAction.DELETE,
+        resource_type="DemolitionSite",
+        resource_id=site.id,
+        change_details={"name": site.name, "site_code": site.site_code},
+        request=request,
+    )
+
+    await db.delete(site)
+    await db.commit()
+    return None

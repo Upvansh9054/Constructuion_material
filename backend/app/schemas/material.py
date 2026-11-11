@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from app.core.constants import ConditionGrade, MaterialCategory
 
 
@@ -11,6 +11,18 @@ class BoundingBox(BaseModel):
     y_max: float
 
 
+class MaterialCategoryDefinitionResponse(BaseModel):
+    category: MaterialCategory
+    name: str
+    description: Optional[str] = None
+    standard_density_t_per_m3: float
+    carbon_offset_factor_kg_per_t: float
+    default_price_per_t_usd: float
+    is_active: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class MaterialItemBase(BaseModel):
     category: MaterialCategory
     subcategory: Optional[str] = None
@@ -19,6 +31,8 @@ class MaterialItemBase(BaseModel):
     estimated_volume_m3: float = Field(default=0.0, ge=0.0)
     estimated_weight_tonnes: float = Field(default=0.0, ge=0.0)
     unit_count: Optional[int] = Field(default=None, ge=0)
+    packing_factor: float = Field(default=0.85, ge=0.1, le=1.0)
+    calculation_method: str = Field(default="calibrated_gsd_photogrammetry")
     contamination_risk: Optional[str] = None
 
 
@@ -37,6 +51,7 @@ class MaterialItemUpdate(BaseModel):
     estimated_volume_m3: Optional[float] = Field(None, ge=0.0)
     estimated_weight_tonnes: Optional[float] = Field(None, ge=0.0)
     unit_count: Optional[int] = Field(None, ge=0)
+    packing_factor: Optional[float] = Field(None, ge=0.1, le=1.0)
     contamination_risk: Optional[str] = None
     is_verified_by_surveyor: Optional[bool] = None
     surveyor_adjustment_notes: Optional[str] = None
@@ -52,11 +67,11 @@ class MaterialItemResponse(MaterialItemBase):
     embodied_carbon_offset_kg: float
     is_verified_by_surveyor: bool
     surveyor_adjustment_notes: Optional[str] = None
+    verified_by_user_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MaterialCategorySummary(BaseModel):
@@ -73,4 +88,3 @@ class ValuationSummary(BaseModel):
     total_recoverable_tonnes: float
     total_carbon_offset_kg_co2e: float
     categories: List[MaterialCategorySummary]
-

@@ -4,9 +4,11 @@ import enum
 class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     CONTRACTOR = "CONTRACTOR"
+    DEMOLITION_CONTRACTOR = "DEMOLITION_CONTRACTOR"
     SURVEYOR = "SURVEYOR"
-    BUYER = "BUYER"
     RECYCLER = "RECYCLER"
+    BUYER = "BUYER"
+    MATERIAL_BUYER = "MATERIAL_BUYER"
 
 
 class SiteStatus(str, enum.Enum):
@@ -29,6 +31,13 @@ class JobStatus(str, enum.Enum):
     IN_PROGRESS = "IN_PROGRESS"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
+
+
+class MediaType(str, enum.Enum):
+    IMAGE = "IMAGE"
+    VIDEO = "VIDEO"
+    ORTHOMOSAIC = "ORTHOMOSAIC"
+    SCAN_360 = "SCAN_360"
 
 
 class MaterialCategory(str, enum.Enum):
@@ -54,6 +63,35 @@ class ListingStatus(str, enum.Enum):
     RESERVED = "RESERVED"
     SOLD = "SOLD"
     CANCELLED = "CANCELLED"
+
+
+class TransactionStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+    IN_TRANSIT = "IN_TRANSIT"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+class AuditAction(str, enum.Enum):
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
+    VERIFY = "VERIFY"
+    ANALYZE = "ANALYZE"
+    BID = "BID"
+    EXPORT = "EXPORT"
+    UPLOAD = "UPLOAD"
+    APPROVE = "APPROVE"
+
+
+class BuyerCompanyType(str, enum.Enum):
+    STEEL_MILL = "STEEL_MILL"
+    AGGREGATE_CRUSHER = "AGGREGATE_CRUSHER"
+    ARCHITECTURAL_SALVAGE = "ARCHITECTURAL_SALVAGE"
+    TIMBER_RECLAIMER = "TIMBER_RECLAIMER"
+    GLASS_RECYCLER = "GLASS_RECYCLER"
 
 
 # Industry standard volumetric mass densities (Metric Tonnes / m^3)
@@ -89,4 +127,3 @@ DEFAULT_BASELINE_PRICE_PER_TONNE = {
     MaterialCategory.GLASS: 45.0,       # Cullet / architectural pane stock
     MaterialCategory.MIXED_DEBRIS: 8.0, # Sorting required aggregate
 }
-

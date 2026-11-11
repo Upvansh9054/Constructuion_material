@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from app.core.constants import JobStatus
 
 
@@ -25,8 +25,7 @@ class AnalysisJobResponse(BaseModel):
     completed_at: Optional[datetime] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DemolitionAuditReportResponse(BaseModel):
@@ -44,6 +43,5 @@ class DemolitionAuditReportResponse(BaseModel):
     pdf_report_s3_key: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 

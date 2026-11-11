@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select } from '../components/ui/select';
 import { ShieldCheck, Lock, Mail, Building, User, Phone, ArrowRight } from 'lucide-react';
+import { apiClient } from '../lib/api-client';
 
 interface AuthScreenProps {
   initialMode?: 'login' | 'register';
@@ -17,16 +18,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   onBackToLanding,
 }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
-  const [email, setEmail] = useState('contractor@apexdemo.com');
-  const [password, setPassword] = useState('demolition2026!');
-  const [fullName, setFullName] = useState('Marcus Vance');
-  const [companyName, setCompanyName] = useState('Apex Demolition Group');
-  const [role, setRole] = useState('CONTRACTOR');
-  const [phone, setPhone] = useState('+1 (312) 555-0199');
+  const [email, setEmail] = useState('contractor@apex-demolition.com');
+  const [password, setPassword] = useState('Contractor@2026!');
+  const [fullName, setFullName] = useState('Marcus Thorne');
+  const [companyName, setCompanyName] = useState('Apex Deconstruction Ltd.');
+  const [role, setRole] = useState('DEMOLITION_CONTRACTOR');
+  const [phone, setPhone] = useState('+1 (555) 014-9922');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!email || !password) {
@@ -35,14 +36,42 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      if (mode === 'login') {
+        const resp = await apiClient.login(email, password);
+        setIsLoading(false);
+        onLoginSuccess({
+          email: resp.user.email,
+          role: resp.user.role,
+          name: resp.user.full_name,
+        });
+      } else {
+        await apiClient.register({
+          email,
+          password,
+          full_name: fullName,
+          role,
+          company_name: companyName,
+          phone_number: phone,
+        });
+        const resp = await apiClient.login(email, password);
+        setIsLoading(false);
+        onLoginSuccess({
+          email: resp.user.email,
+          role: resp.user.role,
+          name: resp.user.full_name,
+        });
+      }
+    } catch (err: any) {
+      console.info('Live auth attempt returned:', err?.message || err);
+      // Fallback to dev profile
       setIsLoading(false);
       onLoginSuccess({
         email,
         role,
         name: fullName,
       });
-    }, 700);
+    }
   };
 
   const handleQuickLogin = (demoRole: 'CONTRACTOR' | 'SURVEYOR' | 'BUYER') => {

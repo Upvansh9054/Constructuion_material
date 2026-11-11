@@ -31,11 +31,11 @@ class MaterialValuationService:
 
     @staticmethod
     def calculate_weight_from_volume(
-        category: MaterialCategory, volume_m3: float
+        category: MaterialCategory, volume_m3: float, packing_factor: float = 1.0
     ) -> float:
         """Convert volume in m^3 to metric tonnes using material density."""
         density = MATERIAL_DENSITIES_TONNES_PER_M3.get(category, 1.50)
-        return round(volume_m3 * density, 3)
+        return round(volume_m3 * density * packing_factor, 3)
 
     @staticmethod
     def calculate_valuation(

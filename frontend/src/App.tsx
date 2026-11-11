@@ -10,6 +10,7 @@ import {
 import { DemolitionSite } from './types/site';
 import { MaterialItem, ValuationSummary } from './types/material';
 import { MarketplaceListing } from './types/marketplace';
+import { apiClient } from './lib/api-client';
 
 // Import All 15 Screens
 import { LandingPage } from './screens/1_LandingPage';
@@ -44,6 +45,42 @@ export const App: React.FC = () => {
   const [listings, setListings] = useState<MarketplaceListing[]>(DEV_LISTINGS);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('prj-101');
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('mat-001');
+
+  // Attempt live API hydration on startup with fixture fallback
+  useEffect(() => {
+    let mounted = true;
+    async function hydrateFromBackend() {
+      try {
+        const sitesResp = await apiClient.getSites();
+        if (mounted && sitesResp.items && sitesResp.items.length > 0) {
+          setProjects(sitesResp.items);
+          setSelectedProjectId(sitesResp.items[0].id);
+        }
+      } catch (err) {
+        console.info('Backend API currently offline; running in development fixture mode.');
+      }
+
+      try {
+        const matResp = await apiClient.getMaterials();
+        if (mounted && matResp.items && matResp.items.length > 0) {
+          setMaterials(matResp.items);
+          setSelectedMaterialId(matResp.items[0].id);
+        }
+      } catch (err) {}
+
+      try {
+        const listResp = await apiClient.getListings();
+        if (mounted && listResp.items && listResp.items.length > 0) {
+          setListings(listResp.items);
+        }
+      } catch (err) {}
+    }
+
+    hydrateFromBackend();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Sync hash routing for deep-linking
   useEffect(() => {
@@ -119,19 +156,29 @@ export const App: React.FC = () => {
   const summary = calculateDynamicSummary();
   const unreadCount = DEV_NOTIFICATIONS.filter((n) => !n.is_read).length;
 
-  // Handlers for state updates
+  // Handlers for state updates with optional live API synchronization
   const handleProjectCreated = (newProject: DemolitionSite) => {
     setProjects((prev) => [newProject, ...prev]);
     setSelectedProjectId(newProject.id);
     navigateTo('upload', newProject.id);
+    // Asynchronously synchronize with backend if live
+    apiClient.createSite(newProject).catch((err) => {
+      console.info('Live backend site sync note:', err.message);
+    });
   };
 
   const handleUpdateMaterial = (updatedItem: MaterialItem) => {
     setMaterials((prev) => prev.map((m) => (m.id === updatedItem.id ? updatedItem : m)));
+    apiClient.updateMaterial(updatedItem.id, updatedItem).catch((err) => {
+      console.info('Live backend material sync note:', err.message);
+    });
   };
 
   const handleCreateListing = (newListing: MarketplaceListing) => {
     setListings((prev) => [newListing, ...prev]);
+    apiClient.createListing(newListing).catch((err) => {
+      console.info('Live backend listing sync note:', err.message);
+    });
   };
 
   // Standalone Fullscreen Views (Landing Page and Auth Screen)
