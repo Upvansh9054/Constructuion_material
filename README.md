@@ -78,7 +78,31 @@ Demolition-Intelligence/
 
 ---
 
-## 3. Quick Start with Docker (Recommended)
+## 3. Implemented Database Modules & Role Architecture
+
+The platform architecture implements all 15 required modules with strict SQLAlchemy 2.0 ORM mappings, Alembic migration versioning, and RBAC:
+
+| Module # | Domain Entity | Primary Model | Key Capabilities |
+| :--- | :--- | :--- | :--- |
+| **1** | Users | `User` | Secure bcrypt hashing, UUID primary keys, active state |
+| **2** | Roles & Permissions | `UserRole` | `ADMIN`, `DEMOLITION_CONTRACTOR`, `SURVEYOR`, `MATERIAL_BUYER`, `RECYCLER` |
+| **3** | Demolition Projects | `DemolitionSite` | Project code uniqueness, timeline, geo-coordinates, contractor ownership |
+| **4** | Site Information | `DemolitionSite` | Structural framing type, footprint $m^2$, asbestos & lead paint hazard screening |
+| **5** | Uploaded Media | `SiteSurvey`, `SurveyImage` | Image & drone video records, camera altitude, focal length, sensor width, GSD |
+| **6** | AI Analysis Records | `AnalysisJob` | Asynchronous Celery CV job status, telemetry metrics, execution duration |
+| **7** | Material Categories | `MaterialCategoryDefinition` | 6 streams: standard density ($t/m^3$), ICE carbon offset factor ($kg CO_2e/t$), benchmark pricing |
+| **8** | Material Inventory | `MaterialItem` | Normalized bounding boxes, surveyor verification sign-off, confidence score |
+| **9** | Quantity Estimates | `MaterialItem` | Calibrated photogrammetry volume ($m^3$), weight ($tonnes$), packing factor |
+| **10** | Recovery Assessments | `MaterialItem` | 5 condition grades, contamination risk, valuation ($USD$), embodied carbon offsets |
+| **11** | Buyers & Recyclers | `BuyerRecyclerProfile` | Industry directory (Steel Mills, Aggregate Crushers, Salvage), distance km, ratings |
+| **12** | Material Listings | `MarketplaceListing` | Secondary commercial circular lots, minimum orders, pickup location, status |
+| **13** | Enquiries & Transactions | `EnquiryTransaction` | Commercial buyer bids, haulage trailer types, status negotiation (Accept/Reject) |
+| **14** | Pre-Demolition Reports | `DemolitionAuditReport` | Pre-Demolition Audit (DMAR), executive synthesis, compliance notes, category breakdowns |
+| **15** | Immutable Audit Ledger | `AuditLog` | Regulatory event logging (CREATE, UPDATE, DELETE, VERIFY, UPLOAD, APPROVE) |
+
+---
+
+## 4. Quick Start with Docker (Recommended)
 
 To run the entire platform with PostgreSQL, Redis, MinIO S3, FastAPI backend, Celery worker, and Vite frontend:
 
@@ -125,7 +149,13 @@ pip install -r requirements.txt
 cp .env.example .env
 
 # Run database migrations
-alembic upgrade head
+python -m alembic upgrade head
+
+# Seed initial turnkey database (Users, Sites, Materials, Listings, Directory)
+python scripts/seed_db.py
+
+# Run backend automated test suite
+python -m pytest tests -v
 
 # Start FastAPI server
 uvicorn app.main:app --reload --port 8000
