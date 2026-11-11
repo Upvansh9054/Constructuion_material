@@ -719,3 +719,4 @@ export const DEV_DETECTION_FRAMES: DetectionFrame[] = [
     ],
   },
 ];
+

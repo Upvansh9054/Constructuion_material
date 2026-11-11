@@ -49,3 +49,4 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
     </div>
   );
 };
+
