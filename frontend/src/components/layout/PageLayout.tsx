@@ -1,24 +1,44 @@
 import React from 'react';
 import { Navbar } from './Navbar';
-import { Sidebar, NavTab } from './Sidebar';
+import { Sidebar, NavScreenId } from './Sidebar';
 
 interface PageLayoutProps {
-  activeTab: NavTab;
-  onSelectTab: (tab: NavTab) => void;
+  activeScreen: NavScreenId;
+  onSelectScreen: (screen: NavScreenId) => void;
+  unreadCount?: number;
+  user: { email: string; role: string; name: string };
+  onLogout?: () => void;
   children: React.ReactNode;
 }
 
-export const PageLayout: React.FC<PageLayoutProps> = ({ activeTab, onSelectTab, children }) => {
+export const PageLayout: React.FC<PageLayoutProps> = ({
+  activeScreen,
+  onSelectScreen,
+  unreadCount = 2,
+  user,
+  onLogout,
+  children,
+}) => {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-white">
+      <Navbar
+        onNavigateToScreen={onSelectScreen}
+        unreadCount={unreadCount}
+        user={user}
+      />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activeTab={activeTab} onSelectTab={onSelectTab} />
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-950/90">
-          <div className="max-w-7xl mx-auto space-y-6">{children}</div>
+        <Sidebar
+          activeScreen={activeScreen}
+          onSelectScreen={onSelectScreen}
+          unreadCount={unreadCount}
+          onLogout={onLogout}
+        />
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-950/90 scrollbar-thin scrollbar-thumb-slate-800">
+          <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
+            {children}
+          </div>
         </main>
       </div>
     </div>
   );
 };
-

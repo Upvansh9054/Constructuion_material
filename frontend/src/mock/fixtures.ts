@@ -1,0 +1,721 @@
+/**
+ * ============================================================================
+ * DEVELOPMENT FIXTURES - DEMOLITION INTELLIGENCE & MATERIAL RECOVERY
+ * ============================================================================
+ * NOTICE: The data below represents strictly structured development fixtures
+ * for client-side evaluation, prototype visualization, and offline UI testing.
+ * These fixtures will be swapped for real-time FastAPI / PostgreSQL API responses
+ * as services are connected.
+ * ============================================================================
+ */
+
+import { DemolitionSite } from '../types/site';
+import { MaterialItem, ValuationSummary } from '../types/material';
+import { SiteSurvey } from '../types/survey';
+import { MarketplaceListing } from '../types/marketplace';
+import { DemolitionAuditReport } from '../types/analysis';
+
+export interface BuyerRecycler {
+  id: string;
+  name: string;
+  company_type: 'STEEL_MILL' | 'AGGREGATE_CRUSHER' | 'ARCHITECTURAL_SALVAGE' | 'TIMBER_RECLAIMER' | 'GLASS_RECYCLER';
+  city: string;
+  state: string;
+  distance_km: number;
+  accepted_categories: string[];
+  certified_standards: string[];
+  total_purchased_tonnes: number;
+  contact_person: string;
+  email: string;
+  phone: string;
+  active_bids_count: number;
+  rating: number;
+}
+
+export interface NotificationItem {
+  id: string;
+  type: 'HAZARD_ALERT' | 'AI_COMPLETE' | 'BID_RECEIVED' | 'COMPLIANCE_REMINDER';
+  title: string;
+  message: string;
+  timestamp: string;
+  is_read: boolean;
+  priority: 'CRITICAL' | 'HIGH' | 'NORMAL';
+  link_screen?: string;
+  project_id?: string;
+}
+
+export interface DetectionFrame {
+  id: string;
+  survey_id: string;
+  image_url: string;
+  thumbnail_url: string;
+  timestamp: string;
+  camera_source: 'DRONE_ORTHOMOSAIC' | 'HANDHELD_INSPECTION' | '360_SCAN';
+  detections: {
+    id: string;
+    box: { x_min: number; y_min: number; x_max: number; y_max: number };
+    category: 'CONCRETE' | 'BRICKS' | 'STEEL' | 'TIMBER' | 'GLASS' | 'MIXED_DEBRIS';
+    subcategory: string;
+    confidence: number;
+    estimated_tonnes: number;
+    condition: 'REUSABLE_EXCELLENT' | 'REUSABLE_GOOD' | 'RECYCLABLE' | 'DOWN_CYCLE_ONLY' | 'HAZARDOUS_CONTAMINATED';
+    hazard_risk?: string;
+  }[];
+}
+
+// ----------------------------------------------------------------------------
+// 1. Demolition Projects
+// ----------------------------------------------------------------------------
+export const DEV_PROJECTS: DemolitionSite[] = [
+  {
+    id: 'prj-101',
+    name: 'Metro Logistics Center Demolition (Phase 2)',
+    site_code: 'MLC-PH2-2026',
+    description: 'Industrial distribution warehouse dismantling and selective deconstruction of 42,000 m² footprint.',
+    address: '450 Demolition Way, Sector B',
+    city: 'Chicago',
+    postal_code: '60609',
+    country: 'USA',
+    latitude: 41.8152,
+    longitude: -87.6534,
+    status: 'ACTIVE_DEMOLITION',
+    estimated_demolition_date: '2026-11-28',
+    contractor_id: 'usr-contractor-01',
+    created_at: '2026-10-12T08:30:00Z',
+    updated_at: '2026-11-10T14:20:00Z',
+  },
+  {
+    id: 'prj-102',
+    name: 'Riverside Steam Plant & Turbine Hall',
+    site_code: 'RSP-TH-2026',
+    description: 'Heavy industrial power facility decommissioning. High recovery potential for structural steel trusses and refractory brick.',
+    address: '1200 Riverfront Expressway',
+    city: 'Pittsburgh',
+    postal_code: '15201',
+    country: 'USA',
+    latitude: 40.4406,
+    longitude: -79.9959,
+    status: 'PRE_DEMOLITION_SURVEY',
+    estimated_demolition_date: '2026-12-15',
+    contractor_id: 'usr-contractor-01',
+    created_at: '2026-10-20T10:15:00Z',
+    updated_at: '2026-11-08T11:45:00Z',
+  },
+  {
+    id: 'prj-103',
+    name: 'Oakridge Commercial Plaza Redevelopment',
+    site_code: 'OCP-RD-2026',
+    description: 'Retail strip center removal for mixed-use transit hub. Concrete slab mobile crushing scheduled on-site.',
+    address: '8800 Oakridge Parkway',
+    city: 'Atlanta',
+    postal_code: '30328',
+    country: 'USA',
+    latitude: 33.749,
+    longitude: -84.388,
+    status: 'PLANNING',
+    estimated_demolition_date: '2027-01-10',
+    contractor_id: 'usr-contractor-01',
+    created_at: '2026-11-01T09:00:00Z',
+    updated_at: '2026-11-05T16:00:00Z',
+  },
+  {
+    id: 'prj-104',
+    name: 'Harbor Grain Elevator Complex',
+    site_code: 'HGE-CX-2025',
+    description: 'Decommissioned concrete silo terminal and timber warehouse. Complete circular salvage audit required.',
+    address: '22 Marine Terminal Road',
+    city: 'Buffalo',
+    postal_code: '14203',
+    country: 'USA',
+    latitude: 42.8864,
+    longitude: -78.8784,
+    status: 'MATERIAL_SORTING',
+    estimated_demolition_date: '2026-10-30',
+    contractor_id: 'usr-contractor-01',
+    created_at: '2026-09-15T11:00:00Z',
+    updated_at: '2026-11-09T13:30:00Z',
+  },
+  {
+    id: 'prj-105',
+    name: 'Westside Civic Annex & Library',
+    site_code: 'WCA-LB-2025',
+    description: 'Municipal institutional building with architectural limestone, vintage bricks, and copper cladding.',
+    address: '310 West Commonwealth Ave',
+    city: 'Cleveland',
+    postal_code: '44113',
+    country: 'USA',
+    latitude: 41.4993,
+    longitude: -81.6944,
+    status: 'COMPLETED',
+    estimated_demolition_date: '2026-09-20',
+    actual_demolition_date: '2026-09-24',
+    contractor_id: 'usr-contractor-01',
+    created_at: '2026-08-01T08:00:00Z',
+    updated_at: '2026-09-28T17:00:00Z',
+  },
+];
+
+// ----------------------------------------------------------------------------
+// 2. Site Surveys
+// ----------------------------------------------------------------------------
+export const DEV_SURVEYS: SiteSurvey[] = [
+  {
+    id: 'srv-001',
+    site_id: 'prj-101',
+    surveyor_id: 'usr-surveyor-01',
+    survey_date: '2026-11-02',
+    weather_condition: 'Clear, 16°C, dry sunlight',
+    survey_notes: 'Drone orthomosaic mission flown at 45m AGL with 80% front overlap. Mezzanine steel columns unbolted and ready for inspection.',
+    status: 'ANALYSIS_COMPLETED',
+    total_images_count: 48,
+    created_at: '2026-11-02T13:00:00Z',
+    updated_at: '2026-11-02T15:30:00Z',
+  },
+  {
+    id: 'srv-002',
+    site_id: 'prj-102',
+    surveyor_id: 'usr-surveyor-01',
+    survey_date: '2026-11-08',
+    weather_condition: 'Overcast, 11°C',
+    survey_notes: 'Ground-level handheld DSLR scan of boiler room and main turbine hall frame.',
+    status: 'PROCESSING',
+    total_images_count: 64,
+    created_at: '2026-11-08T09:45:00Z',
+    updated_at: '2026-11-08T11:00:00Z',
+  },
+];
+
+// ----------------------------------------------------------------------------
+// 3. Material Items (Spanning the 6 Core Categories)
+// ----------------------------------------------------------------------------
+export const DEV_MATERIALS: MaterialItem[] = [
+  {
+    id: 'mat-001',
+    survey_id: 'srv-001',
+    category: 'STEEL',
+    subcategory: 'Structural I-Beams (W14x90)',
+    description: 'Clean structural steel columns and rafters extracted from warehouse mezzanine.',
+    condition_grade: 'REUSABLE_EXCELLENT',
+    estimated_volume_m3: 12.5,
+    estimated_weight_tonnes: 98.1,
+    unit_count: 24,
+    confidence_score: 0.94,
+    bounding_box: { x_min: 0.12, y_min: 0.18, x_max: 0.48, y_max: 0.76 },
+    estimated_market_value_usd: 31392.0,
+    embodied_carbon_offset_kg: 176580.0,
+    is_verified_by_surveyor: true,
+    surveyor_adjustment_notes: 'Verified web thickness and clean bolt connections. Ready for architectural reuse.',
+    created_at: '2026-11-02T15:30:00Z',
+    updated_at: '2026-11-03T09:15:00Z',
+  },
+  {
+    id: 'mat-002',
+    survey_id: 'srv-001',
+    category: 'BRICKS',
+    subcategory: 'Reclaimed Red Clay Facing Bricks',
+    description: 'Solid clay masonry with lime mortar; easy salvage and brick-cleaning potential.',
+    condition_grade: 'REUSABLE_EXCELLENT',
+    estimated_volume_m3: 35.0,
+    estimated_weight_tonnes: 63.0,
+    unit_count: 21000,
+    confidence_score: 0.89,
+    bounding_box: { x_min: 0.52, y_min: 0.22, x_max: 0.88, y_max: 0.68 },
+    estimated_market_value_usd: 11088.0,
+    embodied_carbon_offset_kg: 18144.0,
+    is_verified_by_surveyor: true,
+    created_at: '2026-11-02T15:30:00Z',
+    updated_at: '2026-11-03T10:00:00Z',
+  },
+  {
+    id: 'mat-003',
+    survey_id: 'srv-001',
+    category: 'CONCRETE',
+    subcategory: 'Precast Floor Slabs & Foundation Piers',
+    description: 'High-strength structural concrete suitable for mobile aggregate crushing on-site.',
+    condition_grade: 'RECYCLABLE',
+    estimated_volume_m3: 320.0,
+    estimated_weight_tonnes: 768.0,
+    confidence_score: 0.91,
+    bounding_box: { x_min: 0.05, y_min: 0.45, x_max: 0.75, y_max: 0.92 },
+    estimated_market_value_usd: 11750.4,
+    embodied_carbon_offset_kg: 79872.0,
+    is_verified_by_surveyor: false,
+    created_at: '2026-11-02T15:30:00Z',
+    updated_at: '2026-11-02T15:30:00Z',
+  },
+  {
+    id: 'mat-004',
+    survey_id: 'srv-001',
+    category: 'TIMBER',
+    subcategory: 'Heavy Douglas Fir Roof Trusses',
+    description: 'Structural timber framing, dry and free of fungal rot; fast nail pull required.',
+    condition_grade: 'REUSABLE_GOOD',
+    estimated_volume_m3: 28.0,
+    estimated_weight_tonnes: 18.2,
+    unit_count: 16,
+    confidence_score: 0.86,
+    bounding_box: { x_min: 0.35, y_min: 0.08, x_max: 0.72, y_max: 0.42 },
+    estimated_market_value_usd: 3976.7,
+    embodied_carbon_offset_kg: 8190.0,
+    is_verified_by_surveyor: true,
+    created_at: '2026-11-02T15:30:00Z',
+    updated_at: '2026-11-03T11:00:00Z',
+  },
+  {
+    id: 'mat-005',
+    survey_id: 'srv-001',
+    category: 'GLASS',
+    subcategory: 'Commercial Facade Double Glazing',
+    description: 'Large architectural storefront sheets; optimal for cullet remelting or secondary greenhouse reinstallation.',
+    condition_grade: 'RECYCLABLE',
+    estimated_volume_m3: 4.8,
+    estimated_weight_tonnes: 12.0,
+    confidence_score: 0.83,
+    bounding_box: { x_min: 0.78, y_min: 0.15, x_max: 0.96, y_max: 0.55 },
+    estimated_market_value_usd: 459.0,
+    embodied_carbon_offset_kg: 3360.0,
+    is_verified_by_surveyor: false,
+    created_at: '2026-11-02T15:30:00Z',
+    updated_at: '2026-11-02T15:30:00Z',
+  },
+  {
+    id: 'mat-006',
+    survey_id: 'srv-001',
+    category: 'MIXED_DEBRIS',
+    subcategory: 'Inert Rubble & Masonry Spall',
+    description: 'Unsorted plaster spall and broken mortar; screening needed for road sub-base aggregate.',
+    condition_grade: 'DOWN_CYCLE_ONLY',
+    estimated_volume_m3: 110.0,
+    estimated_weight_tonnes: 165.0,
+    confidence_score: 0.78,
+    bounding_box: { x_min: 0.15, y_min: 0.65, x_max: 0.58, y_max: 0.98 },
+    estimated_market_value_usd: 528.0,
+    embodied_carbon_offset_kg: 2887.5,
+    is_verified_by_surveyor: false,
+    created_at: '2026-11-02T15:30:00Z',
+    updated_at: '2026-11-02T15:30:00Z',
+  },
+  {
+    id: 'mat-007',
+    survey_id: 'srv-002',
+    category: 'STEEL',
+    subcategory: 'Reinforcing Rebar Bundles (#6 & #8)',
+    description: 'High tensile corrugated steel rebar extracted during selective column hydraulic crunching.',
+    condition_grade: 'RECYCLABLE',
+    estimated_volume_m3: 6.2,
+    estimated_weight_tonnes: 48.6,
+    confidence_score: 0.92,
+    bounding_box: { x_min: 0.22, y_min: 0.32, x_max: 0.64, y_max: 0.81 },
+    estimated_market_value_usd: 13219.2,
+    embodied_carbon_offset_kg: 70000.0,
+    is_verified_by_surveyor: true,
+    created_at: '2026-11-08T11:00:00Z',
+    updated_at: '2026-11-08T14:00:00Z',
+  },
+  {
+    id: 'mat-008',
+    survey_id: 'srv-002',
+    category: 'CONCRETE',
+    subcategory: 'Crushed High-Density Foundation Footings',
+    description: 'Massive unreinforced foundation pads crushed to 0-40mm aggregate size.',
+    condition_grade: 'RECYCLABLE',
+    estimated_volume_m3: 450.0,
+    estimated_weight_tonnes: 1080.0,
+    confidence_score: 0.95,
+    bounding_box: { x_min: 0.08, y_min: 0.12, x_max: 0.92, y_max: 0.88 },
+    estimated_market_value_usd: 16524.0,
+    embodied_carbon_offset_kg: 112320.0,
+    is_verified_by_surveyor: true,
+    created_at: '2026-11-08T11:00:00Z',
+    updated_at: '2026-11-08T14:30:00Z',
+  },
+  {
+    id: 'mat-009',
+    survey_id: 'srv-002',
+    category: 'MIXED_DEBRIS',
+    subcategory: 'Insulated Pipe Lagging (Contaminated)',
+    description: 'Suspected fibrous insulation wrapping high pressure steam lines. Requires specialist abatement.',
+    condition_grade: 'HAZARDOUS_CONTAMINATED',
+    estimated_volume_m3: 3.5,
+    estimated_weight_tonnes: 2.1,
+    contamination_risk: 'High Asbestos (ACM) Probability - Mandatory Lab Analysis Required',
+    confidence_score: 0.88,
+    bounding_box: { x_min: 0.65, y_min: 0.25, x_max: 0.85, y_max: 0.58 },
+    estimated_market_value_usd: 0.0,
+    embodied_carbon_offset_kg: 0.0,
+    is_verified_by_surveyor: true,
+    created_at: '2026-11-08T11:00:00Z',
+    updated_at: '2026-11-08T14:45:00Z',
+  },
+];
+
+// ----------------------------------------------------------------------------
+// 4. Aggregated Metric Summary
+// ----------------------------------------------------------------------------
+export const DEV_VALUATION_SUMMARY: ValuationSummary = {
+  total_estimated_value_usd: 59194.1,
+  total_recoverable_tonnes: 1124.3,
+  total_carbon_offset_kg_co2e: 289033.5,
+  categories: [
+    {
+      category: 'STEEL',
+      total_volume_m3: 12.5,
+      total_weight_tonnes: 98.1,
+      estimated_value_usd: 31392.0,
+      carbon_offset_kg_co2e: 176580.0,
+      item_count: 1,
+    },
+    {
+      category: 'CONCRETE',
+      total_volume_m3: 320.0,
+      total_weight_tonnes: 768.0,
+      estimated_value_usd: 11750.4,
+      carbon_offset_kg_co2e: 79872.0,
+      item_count: 1,
+    },
+    {
+      category: 'BRICKS',
+      total_volume_m3: 35.0,
+      total_weight_tonnes: 63.0,
+      estimated_value_usd: 11088.0,
+      carbon_offset_kg_co2e: 18144.0,
+      item_count: 1,
+    },
+    {
+      category: 'TIMBER',
+      total_volume_m3: 28.0,
+      total_weight_tonnes: 18.2,
+      estimated_value_usd: 3976.7,
+      carbon_offset_kg_co2e: 8190.0,
+      item_count: 1,
+    },
+    {
+      category: 'MIXED_DEBRIS',
+      total_volume_m3: 110.0,
+      total_weight_tonnes: 165.0,
+      estimated_value_usd: 528.0,
+      carbon_offset_kg_co2e: 2887.5,
+      item_count: 1,
+    },
+    {
+      category: 'GLASS',
+      total_volume_m3: 4.8,
+      total_weight_tonnes: 12.0,
+      estimated_value_usd: 459.0,
+      carbon_offset_kg_co2e: 3360.0,
+      item_count: 1,
+    },
+  ],
+};
+
+// ----------------------------------------------------------------------------
+// 5. Secondary Material Marketplace Listings
+// ----------------------------------------------------------------------------
+export const DEV_LISTINGS: MarketplaceListing[] = [
+  {
+    id: 'list-001',
+    material_item_id: 'mat-001',
+    seller_id: 'usr-contractor-01',
+    title: '98 Tonnes Structural Steel I-Beams (W14x90)',
+    description: 'Clean unbolted structural beams in prime condition. Stored under weather tarpaulins on site.',
+    available_tonnes: 98.1,
+    min_order_tonnes: 10.0,
+    price_per_tonne_usd: 320.0,
+    total_price_usd: 31392.0,
+    pickup_address: '450 Demolition Way, Gate 4',
+    pickup_city: 'Chicago, IL',
+    logistics_notes: 'Heavy crane loading available on site through next Friday.',
+    status: 'ACTIVE',
+    listed_at: '2026-11-03T14:00:00Z',
+    created_at: '2026-11-03T14:00:00Z',
+    updated_at: '2026-11-03T14:00:00Z',
+  },
+  {
+    id: 'list-002',
+    material_item_id: 'mat-002',
+    seller_id: 'usr-contractor-01',
+    title: '21,000 Vintage Reclaimed Red Clay Facing Bricks',
+    description: '1940s vintage solid clay masonry. Palletized (500 bricks per pallet), wrapped for flatbed freight.',
+    available_tonnes: 63.0,
+    min_order_tonnes: 5.0,
+    price_per_tonne_usd: 176.0,
+    total_price_usd: 11088.0,
+    pickup_address: '450 Demolition Way, Yard A',
+    pickup_city: 'Chicago, IL',
+    logistics_notes: 'Forklift loading onto standard flatbed trailers.',
+    status: 'ACTIVE',
+    listed_at: '2026-11-03T14:30:00Z',
+    created_at: '2026-11-03T14:30:00Z',
+    updated_at: '2026-11-03T14:30:00Z',
+  },
+  {
+    id: 'list-003',
+    material_item_id: 'mat-004',
+    seller_id: 'usr-contractor-01',
+    title: '18.2 Tonnes Salvaged Douglas Fir Heavy Roof Trusses',
+    description: 'Long-span heavy structural wood framing. Excellent grain density, minimal fastener splitting.',
+    available_tonnes: 18.2,
+    min_order_tonnes: 2.0,
+    price_per_tonne_usd: 218.5,
+    total_price_usd: 3976.7,
+    pickup_address: '450 Demolition Way, Gate 1',
+    pickup_city: 'Chicago, IL',
+    logistics_notes: 'Extendable flatbed trailer required for 12m beam lengths.',
+    status: 'ACTIVE',
+    listed_at: '2026-11-04T10:00:00Z',
+    created_at: '2026-11-04T10:00:00Z',
+    updated_at: '2026-11-04T10:00:00Z',
+  },
+  {
+    id: 'list-004',
+    material_item_id: 'mat-007',
+    seller_id: 'usr-contractor-01',
+    title: '48.6 Tonnes Cleaned Steel Rebar Bundles (#6 & #8)',
+    description: 'Excavated and electromagnetically sorted reinforcing steel for electric arc furnace remelting.',
+    available_tonnes: 48.6,
+    min_order_tonnes: 15.0,
+    price_per_tonne_usd: 272.0,
+    total_price_usd: 13219.2,
+    pickup_address: '1200 Riverfront Expressway',
+    pickup_city: 'Pittsburgh, PA',
+    logistics_notes: 'Barge loading facility or dump trailer loading available.',
+    status: 'ACTIVE',
+    listed_at: '2026-11-08T15:00:00Z',
+    created_at: '2026-11-08T15:00:00Z',
+    updated_at: '2026-11-08T15:00:00Z',
+  },
+];
+
+// ----------------------------------------------------------------------------
+// 6. Certified Buyers & Recyclers Directory
+// ----------------------------------------------------------------------------
+export const DEV_BUYERS_RECYCLERS: BuyerRecycler[] = [
+  {
+    id: 'byr-01',
+    name: 'Midwest Circular Steel & Mini-Mill Corp',
+    company_type: 'STEEL_MILL',
+    city: 'Gary',
+    state: 'IN',
+    distance_km: 42,
+    accepted_categories: ['STEEL'],
+    certified_standards: ['ISO 14001', 'LEED Secondary Material Supplier', 'R2v3 Certified'],
+    total_purchased_tonnes: 14500,
+    contact_person: 'David Chen',
+    email: 'd.chen@midweststeel.com',
+    phone: '+1 (219) 555-8910',
+    active_bids_count: 2,
+    rating: 4.9,
+  },
+  {
+    id: 'byr-02',
+    name: 'Heritage Brick & Architectural Reclamation',
+    company_type: 'ARCHITECTURAL_SALVAGE',
+    city: 'Chicago',
+    state: 'IL',
+    distance_km: 18,
+    accepted_categories: ['BRICKS', 'TIMBER', 'GLASS'],
+    certified_standards: ['National Salvage Guild', 'Historic Preservation Accredited'],
+    total_purchased_tonnes: 3200,
+    contact_person: 'Elena Rostova',
+    email: 'elena@heritagebrick.org',
+    phone: '+1 (312) 555-0422',
+    active_bids_count: 1,
+    rating: 4.8,
+  },
+  {
+    id: 'byr-03',
+    name: 'Great Lakes Aggregate Crushing & Recycled Base',
+    company_type: 'AGGREGATE_CRUSHER',
+    city: 'Joliet',
+    state: 'IL',
+    distance_km: 55,
+    accepted_categories: ['CONCRETE', 'MIXED_DEBRIS'],
+    certified_standards: ['DOT Approved Road Base Supplier', 'EPA Circular Partner'],
+    total_purchased_tonnes: 88000,
+    contact_person: 'Frank Gallagher',
+    email: 'frank@greatlakesaggregate.com',
+    phone: '+1 (815) 555-7734',
+    active_bids_count: 3,
+    rating: 4.7,
+  },
+  {
+    id: 'byr-04',
+    name: 'Timbercraft Reclaimed Lumber Co',
+    company_type: 'TIMBER_RECLAIMER',
+    city: 'Rockford',
+    state: 'IL',
+    distance_km: 110,
+    accepted_categories: ['TIMBER'],
+    certified_standards: ['FSC Recycled 100%', 'USDA BioPreferred'],
+    total_purchased_tonnes: 1850,
+    contact_person: 'Hannah Miller',
+    email: 'hannah@timbercraftreclaim.com',
+    phone: '+1 (815) 555-3290',
+    active_bids_count: 1,
+    rating: 5.0,
+  },
+  {
+    id: 'byr-05',
+    name: 'CulletTech Commercial Glass Remelters',
+    company_type: 'GLASS_RECYCLER',
+    city: 'Milwaukee',
+    state: 'WI',
+    distance_km: 140,
+    accepted_categories: ['GLASS'],
+    certified_standards: ['Container Glass Recyclers Association', 'Clean Glass Audit'],
+    total_purchased_tonnes: 9200,
+    contact_person: 'Julian Ward',
+    email: 'j.ward@cullettech.com',
+    phone: '+1 (414) 555-6671',
+    active_bids_count: 0,
+    rating: 4.6,
+  },
+];
+
+// ----------------------------------------------------------------------------
+// 7. Demolition Material Audit Report (DMAR)
+// ----------------------------------------------------------------------------
+export const DEV_AUDIT_REPORT: DemolitionAuditReport = {
+  id: 'dmar-001',
+  site_id: 'prj-101',
+  survey_id: 'srv-001',
+  report_title: 'Pre-Demolition Material Audit Report (DMAR) - Metro Logistics Center',
+  executive_summary: `This pre-demolition material recovery audit was performed for Metro Logistics Center Demolition (Phase 2) located in Chicago, IL. Automated computer vision and photogrammetric scanning of 48 inspection frames identified 1,124.3 metric tonnes of recoverable construction materials across 6 streams.
+
+Structural steel salvage (98.1 t) and historical red clay brick recovery (63.0 t) represent the highest financial return at an estimated secondary market value of $59,194.10 USD. High-grade concrete slabs (768.0 t) are recommended for on-site aggregate mobile crushing to supply municipal road sub-base projects.
+
+Total embodied carbon offsets from diverting these materials from local landfills amount to 289.0 metric tonnes of CO₂e (289,033 kg CO₂e), satisfying both state landfill diversion mandates and LEED v4.1 Materials & Resources circularity credits.`,
+  regulatory_compliance_notes: `• EPA C&D Waste Diversion Rate: 88.4% achieved (Threshold: 70%).
+• Pre-demolition hazardous materials inspection: Cleared for asbestos-containing materials (ACM) and lead paint across mezzanine and roof trusses.
+• Chain of custody waste transfer notes: Certified digital manifest generated for secondary buyer pickup.`,
+  buyer_matching_insights: `• Recommended buyer: Midwest Circular Steel for full 98.1 t I-beam lot at $320/t.
+• Recommended buyer: Heritage Brick for 21,000 architectural bricks with on-site pallet loading.
+• On-site crushing contract suggested for Great Lakes Aggregate to eliminate 768 tonnes of transport emissions.`,
+  total_recoverable_tonnes: 1124.3,
+  total_estimated_value_usd: 59194.1,
+  total_carbon_offset_kg_co2e: 289033.5,
+  detailed_breakdown_json: DEV_VALUATION_SUMMARY.categories,
+  pdf_report_s3_key: 'reports/prj-101/DMAR_Audit_Report_v1.pdf',
+  created_at: '2026-11-03T16:00:00Z',
+};
+
+// ----------------------------------------------------------------------------
+// 8. Notifications & Alerts
+// ----------------------------------------------------------------------------
+export const DEV_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'notif-01',
+    type: 'HAZARD_ALERT',
+    title: 'Potential Hazardous Material Flagged',
+    message: 'High probability of Asbestos ACM detected on steam pipe lagging in Riverside Steam Plant (Survey #srv-002). Abatement hold recommended.',
+    timestamp: '2026-11-08T11:45:00Z',
+    is_read: false,
+    priority: 'CRITICAL',
+    link_screen: 'materials',
+    project_id: 'prj-102',
+  },
+  {
+    id: 'notif-02',
+    type: 'BID_RECEIVED',
+    title: 'New Bid Placed: $31,392 USD',
+    message: 'Midwest Circular Steel placed a full-lot bid on 98.1t Structural Steel I-Beams (Lot #list-001).',
+    timestamp: '2026-11-09T14:22:00Z',
+    is_read: false,
+    priority: 'HIGH',
+    link_screen: 'marketplace',
+    project_id: 'prj-101',
+  },
+  {
+    id: 'notif-03',
+    type: 'AI_COMPLETE',
+    title: 'AI Analysis Complete: 6 Streams Logged',
+    message: 'Inference completed for Metro Logistics Center. 1,124.3 tonnes estimated with 94% confidence.',
+    timestamp: '2026-11-02T15:30:00Z',
+    is_read: true,
+    priority: 'NORMAL',
+    link_screen: 'analysis',
+    project_id: 'prj-101',
+  },
+  {
+    id: 'notif-04',
+    type: 'COMPLIANCE_REMINDER',
+    title: 'DMAR Report Sign-Off Due',
+    message: 'Demolition audit compliance filing due within 7 days prior to mechanical takedown for Oakridge Commercial Plaza.',
+    timestamp: '2026-11-05T09:00:00Z',
+    is_read: true,
+    priority: 'NORMAL',
+    link_screen: 'reports',
+    project_id: 'prj-103',
+  },
+];
+
+// ----------------------------------------------------------------------------
+// 9. AI Detection Frames (Inspection Visualizer)
+// ----------------------------------------------------------------------------
+export const DEV_DETECTION_FRAMES: DetectionFrame[] = [
+  {
+    id: 'frame-01',
+    survey_id: 'srv-001',
+    image_url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156f?q=80&w=1200&auto=format&fit=crop',
+    thumbnail_url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156f?q=80&w=300&auto=format&fit=crop',
+    timestamp: '2026-11-02T13:12:00Z',
+    camera_source: 'DRONE_ORTHOMOSAIC',
+    detections: [
+      {
+        id: 'det-1',
+        box: { x_min: 0.12, y_min: 0.18, x_max: 0.48, y_max: 0.76 },
+        category: 'STEEL',
+        subcategory: 'Structural I-Beams (W14x90)',
+        confidence: 0.94,
+        estimated_tonnes: 98.1,
+        condition: 'REUSABLE_EXCELLENT',
+      },
+      {
+        id: 'det-2',
+        box: { x_min: 0.52, y_min: 0.22, x_max: 0.88, y_max: 0.68 },
+        category: 'BRICKS',
+        subcategory: 'Reclaimed Red Clay Facing Bricks',
+        confidence: 0.89,
+        estimated_tonnes: 63.0,
+        condition: 'REUSABLE_EXCELLENT',
+      },
+      {
+        id: 'det-3',
+        box: { x_min: 0.05, y_min: 0.45, x_max: 0.75, y_max: 0.92 },
+        category: 'CONCRETE',
+        subcategory: 'Precast Floor Slabs',
+        confidence: 0.91,
+        estimated_tonnes: 768.0,
+        condition: 'RECYCLABLE',
+      },
+    ],
+  },
+  {
+    id: 'frame-02',
+    survey_id: 'srv-001',
+    image_url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop',
+    thumbnail_url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=300&auto=format&fit=crop',
+    timestamp: '2026-11-02T13:24:00Z',
+    camera_source: 'HANDHELD_INSPECTION',
+    detections: [
+      {
+        id: 'det-4',
+        box: { x_min: 0.35, y_min: 0.08, x_max: 0.72, y_max: 0.42 },
+        category: 'TIMBER',
+        subcategory: 'Heavy Douglas Fir Roof Trusses',
+        confidence: 0.86,
+        estimated_tonnes: 18.2,
+        condition: 'REUSABLE_GOOD',
+      },
+      {
+        id: 'det-5',
+        box: { x_min: 0.15, y_min: 0.65, x_max: 0.58, y_max: 0.98 },
+        category: 'MIXED_DEBRIS',
+        subcategory: 'Inert Rubble Spall',
+        confidence: 0.78,
+        estimated_tonnes: 165.0,
+        condition: 'DOWN_CYCLE_ONLY',
+      },
+    ],
+  },
+];
