@@ -180,3 +180,4 @@ erDiagram
 - **Foreign Keys**: Every foreign key is explicitly indexed to avoid full table scans during joins and cascade deletions.
 - **Geographic & Search Indexes**: `city` and `site_code` are indexed for fast contractor filtering and logistics queries.
 - **Enum Indexes**: Status fields (`JobStatus`, `SurveyStatus`, `ListingStatus`) are indexed to optimize dashboard queries and polling workers.
+

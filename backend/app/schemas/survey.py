@@ -65,3 +65,4 @@ class SurveyResponse(SurveyBase):
 
     class Config:
         from_attributes = True
+

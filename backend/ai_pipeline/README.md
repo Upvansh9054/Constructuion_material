@@ -73,3 +73,4 @@ Copy the resulting best checkpoint:
 cp runs/demolition/demolition_v1/weights/best.pt backend/ai_pipeline/weights/demolition_materials_yolov8.pt
 ```
 If the weights file is absent, the backend explicitly raises `ModelWeightsNotFoundError` rather than returning fictitious mock data.
+

@@ -20,3 +20,4 @@ class PaginatedResponse(BaseModel, Generic[T]):
 class MessageResponse(BaseModel):
     message: str
     detail: Optional[str] = None
+

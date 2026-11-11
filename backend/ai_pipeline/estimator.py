@@ -158,3 +158,4 @@ class HeuristicConditionAssessor(BaseConditionClassifier):
             hazard_flags=hazard_flags,
             inspection_notes=f"Automated visual surface inspection completed for {category.value}.",
         )
+

@@ -73,3 +73,4 @@ class ValuationSummary(BaseModel):
     total_recoverable_tonnes: float
     total_carbon_offset_kg_co2e: float
     categories: List[MaterialCategorySummary]
+

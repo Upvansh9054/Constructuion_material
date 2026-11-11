@@ -23,3 +23,4 @@ export interface DemolitionSite {
   created_at: string;
   updated_at: string;
 }
+

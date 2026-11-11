@@ -45,3 +45,4 @@ class SiteResponse(SiteBase):
 
     class Config:
         from_attributes = True
+

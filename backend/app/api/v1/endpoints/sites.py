@@ -109,3 +109,4 @@ async def update_site_details(
     await db.commit()
     await db.refresh(site)
     return site
+

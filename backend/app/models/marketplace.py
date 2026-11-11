@@ -39,3 +39,4 @@ class MarketplaceListing(Base, BaseMixin):
     # Relationships
     material_item = relationship("MaterialItem", back_populates="marketplace_listings")
     seller = relationship("User", back_populates="listings")
+

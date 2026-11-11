@@ -142,3 +142,4 @@ All client errors (4xx) and server errors (5xx) adhere to a consistent JSON resp
 | :--- | :--- | :--- | :---: |
 | `GET` | `/health/live` | Container liveness check | No |
 | `GET` | `/health/ready` | Readiness check verifying database, Redis, and storage configs | No |
+

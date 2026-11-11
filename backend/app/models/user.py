@@ -21,3 +21,4 @@ class User(Base, BaseMixin):
     sites = relationship("DemolitionSite", back_populates="contractor")
     surveys = relationship("SiteSurvey", back_populates="surveyor")
     listings = relationship("MarketplaceListing", back_populates="seller")
+

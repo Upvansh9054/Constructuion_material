@@ -109,3 +109,4 @@ class ImagePreprocessor:
             )
 
         return canvas
+

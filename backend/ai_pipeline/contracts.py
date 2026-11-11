@@ -82,3 +82,4 @@ class BaseConditionClassifier(ABC):
         category: MaterialCategory,
     ) -> ConditionAssessment:
         pass
+

@@ -63,3 +63,4 @@ class MaterialValuationService:
 
 
 valuation_service = MaterialValuationService()
+

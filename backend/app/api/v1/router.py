@@ -16,3 +16,4 @@ api_router.include_router(surveys.router, prefix="/surveys", tags=["Site Surveys
 api_router.include_router(materials.router, prefix="/materials", tags=["Detected Materials & Valuation"])
 api_router.include_router(analysis.router, prefix="/analysis", tags=["AI Analysis & Audit Reports"])
 api_router.include_router(marketplace.router, prefix="/marketplace", tags=["Secondary Materials Marketplace"])
+

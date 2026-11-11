@@ -129,3 +129,4 @@ class YOLOMaterialDetector(BaseMaterialDetector):
             )
 
         return detections
+

@@ -13,3 +13,4 @@ def setup_logging():
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+

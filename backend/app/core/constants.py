@@ -89,3 +89,4 @@ DEFAULT_BASELINE_PRICE_PER_TONNE = {
     MaterialCategory.GLASS: 45.0,       # Cullet / architectural pane stock
     MaterialCategory.MIXED_DEBRIS: 8.0, # Sorting required aggregate
 }
+

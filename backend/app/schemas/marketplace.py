@@ -44,3 +44,4 @@ class ListingResponse(ListingBase):
 
     class Config:
         from_attributes = True
+

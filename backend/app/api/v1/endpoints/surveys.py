@@ -136,3 +136,4 @@ async def upload_survey_image_direct(
     resp = SurveyImageResponse.model_validate(image_record)
     resp.download_url = down_url
     return resp
+

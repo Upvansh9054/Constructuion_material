@@ -81,3 +81,4 @@ async def readiness_probe():
         "redis_configured": bool(settings.REDIS_URL),
         "s3_storage_configured": bool(settings.S3_ENDPOINT_URL or settings.S3_BUCKET_NAME),
     }
+

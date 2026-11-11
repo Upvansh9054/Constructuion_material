@@ -67,3 +67,4 @@ class MaterialItem(Base, BaseMixin):
     survey = relationship("SiteSurvey", back_populates="material_items")
     source_image = relationship("SurveyImage", back_populates="material_items")
     marketplace_listings = relationship("MarketplaceListing", back_populates="material_item", cascade="all, delete-orphan")
+

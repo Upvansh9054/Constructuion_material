@@ -30,3 +30,4 @@ export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement
 export const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => {
   return <div className={cn('pt-0', className)} {...props}>{children}</div>;
 };
+

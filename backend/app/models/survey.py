@@ -83,3 +83,4 @@ class SurveyImage(Base, BaseMixin):
     # Relationships
     survey = relationship("SiteSurvey", back_populates="images")
     material_items = relationship("MaterialItem", back_populates="source_image")
+

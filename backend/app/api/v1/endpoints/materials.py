@@ -148,3 +148,4 @@ async def update_material_item(
     await db.commit()
     await db.refresh(item)
     return item
+

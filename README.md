@@ -181,3 +181,4 @@ The computer vision engine is strictly separated from the web backend:
    - Add bidding, payment escrow, and logistics haulage tracking in the `/marketplace` module.
 4. **Automated PDF Export**:
    - Implement WeasyPrint or ReportLab service to compile DMAR reports into official compliance PDFs with photo evidence.
+

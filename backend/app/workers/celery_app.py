@@ -19,3 +19,4 @@ celery_app.conf.update(
     task_soft_time_limit=1500,
     worker_prefetch_multiplier=1,  # Prevent worker overload with heavy CV tasks
 )
+

@@ -92,3 +92,4 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ item, onVerify }) =>
     </Card>
   );
 };
+

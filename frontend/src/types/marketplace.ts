@@ -19,3 +19,4 @@ export interface MarketplaceListing {
   created_at: string;
   updated_at: string;
 }
+

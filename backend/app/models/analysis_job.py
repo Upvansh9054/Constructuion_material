@@ -29,3 +29,4 @@ class AnalysisJob(Base, BaseMixin):
 
     # Relationship
     survey = relationship("SiteSurvey", back_populates="analysis_jobs")
+

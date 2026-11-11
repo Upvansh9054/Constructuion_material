@@ -57,3 +57,4 @@ export interface ValuationSummary {
   total_carbon_offset_kg_co2e: number;
   categories: MaterialCategorySummary[];
 }
+

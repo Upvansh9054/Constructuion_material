@@ -101,3 +101,4 @@ Return a strict JSON object with these 3 keys:
 
 
 llm_report_service = LLMDemolitionReportService()
+

@@ -34,3 +34,4 @@ RUN echo 'server { \
 EXPOSE 5173
 
 CMD ["nginx", "-g", "daemon off;"]
+

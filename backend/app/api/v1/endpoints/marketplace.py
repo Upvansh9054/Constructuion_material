@@ -108,3 +108,4 @@ async def update_listing_status(
     await db.commit()
     await db.refresh(listing)
     return listing
+

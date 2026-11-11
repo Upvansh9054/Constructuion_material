@@ -220,3 +220,4 @@ def process_survey_analysis_task(self, survey_id: str, job_id: str):
     """Celery task entry point."""
     logger.info(f"Starting Celery task for survey_id={survey_id}, job_id={job_id}")
     asyncio.run(_execute_survey_analysis_async(survey_id, job_id))
+

@@ -31,3 +31,4 @@ class DemolitionSite(Base, BaseMixin):
     # Associated Surveys & Reports
     surveys = relationship("SiteSurvey", back_populates="site", cascade="all, delete-orphan")
     reports = relationship("DemolitionAuditReport", back_populates="site", cascade="all, delete-orphan")
+

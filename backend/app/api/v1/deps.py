@@ -51,3 +51,4 @@ async def get_current_active_superuser(
             detail="Operation requires superuser privileges",
         )
     return current_user
+

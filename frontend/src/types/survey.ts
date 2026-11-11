@@ -34,3 +34,4 @@ export interface SiteSurvey {
   updated_at: string;
   images?: SurveyImage[];
 }
+

@@ -51,3 +51,4 @@ export const MaterialList: React.FC<MaterialListProps> = ({ items, onVerifyItem 
     </div>
   );
 };
+

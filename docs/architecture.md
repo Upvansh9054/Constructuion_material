@@ -94,3 +94,4 @@ $$\text{Offset } (kg\ CO_2e) = \text{Weight (tonnes)} \times \text{Carbon Factor
 - Reconditioning (`REUSABLE_GOOD`): Multiplier = $1.00$
 - Crushing/Remelting (`RECYCLABLE`): Multiplier = $0.80$ (reprocessing energy subtracted)
 - Downcycling (`DOWN_CYCLE_ONLY`): Multiplier = $0.35$
+

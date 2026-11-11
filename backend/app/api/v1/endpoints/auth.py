@@ -75,3 +75,4 @@ async def login_for_access_token(
 async def get_current_user_profile(current_user: User = Depends(get_current_user)):
     """Retrieve details of the authenticated user."""
     return current_user
+

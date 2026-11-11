@@ -35,3 +35,4 @@ class DemolitionAuditReport(Base, BaseMixin):
     # Relationships
     site = relationship("DemolitionSite", back_populates="reports")
     survey = relationship("SiteSurvey", back_populates="audit_reports")
+

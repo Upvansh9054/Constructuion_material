@@ -100,3 +100,4 @@ async def get_survey_audit_report(
             detail="Demolition audit report not found for this survey. Trigger analysis first.",
         )
     return report
+
