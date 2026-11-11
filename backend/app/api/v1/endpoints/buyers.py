@@ -173,3 +173,4 @@ async def delete_buyer_profile(
     await db.delete(profile)
     await db.commit()
     return None
+

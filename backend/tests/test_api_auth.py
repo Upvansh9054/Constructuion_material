@@ -54,3 +54,4 @@ async def test_invalid_login_credentials(async_client: AsyncClient):
     }
     response = await async_client.post("/api/v1/auth/login", data=login_data)
     assert response.status_code == 401
+

@@ -159,3 +159,4 @@ async def delete_audit_report(
     await db.delete(report)
     await db.commit()
     return None
+

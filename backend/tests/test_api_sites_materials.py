@@ -113,3 +113,4 @@ async def test_full_demolition_and_material_flow(
     bid = bid_res.json()
     assert bid["total_offer_usd"] == 16000.0
     assert bid["status"] == "PENDING"
+

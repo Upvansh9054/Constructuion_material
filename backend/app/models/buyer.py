@@ -39,3 +39,4 @@ class BuyerRecyclerProfile(Base, BaseMixin):
 
     # Relationships
     user = relationship("User", back_populates="buyer_profile")
+

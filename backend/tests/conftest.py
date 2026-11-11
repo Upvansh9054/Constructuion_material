@@ -117,3 +117,4 @@ async def buyer_user() -> User:
 async def buyer_headers(buyer_user: User) -> dict:
     token = create_access_token(subject=buyer_user.id)
     return {"Authorization": f"Bearer {token}"}
+

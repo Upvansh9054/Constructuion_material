@@ -26,3 +26,4 @@ class AuditLog(Base, BaseMixin):
 
     # Relationships
     user = relationship("User", back_populates="audit_logs")
+
