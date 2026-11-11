@@ -1,0 +1,74 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node & Frontend
+node_modules/
+.pnp
+.pnp.js
+coverage/
+dist/
+dist-ssr/
+*.local
+.npm
+
+# AI Models & Large Files (Weights)
+ai_pipeline/weights/*.pt
+ai_pipeline/weights/*.onnx
+ai_pipeline/weights/*.engine
+ai_pipeline/weights/*.bin
+!ai_pipeline/weights/.gitkeep
+*.h5
+*.tflite
+*.safetensors
+
+# Logs & Databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+docker/postgres/data/
+docker/minio/data/
+
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+
+# Operating System & IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
