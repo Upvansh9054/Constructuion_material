@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List, Union
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -56,6 +57,20 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:5173",
     ]
+
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def adjust_for_vercel(cls, v: str) -> str:
+        if os.getenv("VERCEL") == "1" and "sqlite" in v and "/tmp" not in v:
+            return "sqlite+aiosqlite:////tmp/demolition_intelligence.db"
+        return v
+
+    @field_validator("DATABASE_SYNC_URL", mode="after")
+    @classmethod
+    def adjust_sync_for_vercel(cls, v: str) -> str:
+        if os.getenv("VERCEL") == "1" and "sqlite" in v and "/tmp" not in v:
+            return "sqlite:////tmp/demolition_intelligence.db"
+        return v
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

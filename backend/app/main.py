@@ -56,7 +56,6 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,17 +63,6 @@ app.add_middleware(
 
 # API v1 Router Registration
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-
-@app.get("/", tags=["Health & Diagnostics"], status_code=status.HTTP_200_OK)
-async def root():
-    """Root endpoint for cloud load balancers and deployment verification."""
-    return {
-        "status": "online",
-        "service": settings.PROJECT_NAME,
-        "docs": "/docs",
-        "version": "0.1.0",
-    }
 
 
 @app.get("/health/live", tags=["Health & Diagnostics"], status_code=status.HTTP_200_OK)
