@@ -31,8 +31,8 @@ import { NotificationsScreen } from './screens/14_NotificationsScreen';
 import { SettingsScreen } from './screens/15_SettingsScreen';
 
 export const App: React.FC = () => {
-  // Navigation & Authentication State
-  const [activeScreen, setActiveScreen] = useState<NavScreenId>('dashboard');
+  // Navigation & Authentication State (Defaults to Login Screen)
+  const [activeScreen, setActiveScreen] = useState<NavScreenId>('auth');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [user, setUser] = useState({
     email: 'contractor@apexdemo.com',
