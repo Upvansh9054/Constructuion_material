@@ -12,14 +12,24 @@ import {
 } from 'lucide-react';
 
 interface NotificationsScreenProps {
+  notifications?: NotificationItem[];
+  onMarkAllAsRead?: () => void;
+  onMarkOneAsRead?: (id: string) => void;
   onNavigateToScreen: (screen: string, contextId?: string) => void;
 }
 
 export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({
+  notifications: initialNotifications,
+  onMarkAllAsRead: externalMarkAllAsRead,
+  onMarkOneAsRead: externalMarkOneAsRead,
   onNavigateToScreen,
 }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(DEV_NOTIFICATIONS);
+  const [localNotifications, setLocalNotifications] = useState<NotificationItem[]>(
+    initialNotifications || DEV_NOTIFICATIONS
+  );
   const [filterPriority, setFilterPriority] = useState<string>('ALL');
+
+  const notifications = initialNotifications || localNotifications;
 
   const filtered = notifications.filter((n) => {
     if (filterPriority === 'ALL') return true;
@@ -28,11 +38,19 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({
   });
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    if (externalMarkAllAsRead) {
+      externalMarkAllAsRead();
+    } else {
+      setLocalNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    }
   };
 
   const markOneAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    if (externalMarkOneAsRead) {
+      externalMarkOneAsRead(id);
+    } else {
+      setLocalNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    }
   };
 
   const getIcon = (type: NotificationItem['type']) => {

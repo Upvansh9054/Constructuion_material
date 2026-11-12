@@ -20,7 +20,7 @@ def test_image_preprocessor_tiling():
 
 def test_detector_missing_weights_raises_error():
     """Verify strictly that the AI detector never presents fake results without real weights."""
-    detector = YOLOMaterialDetector(weights_path="non_existent_weights_2026.pt")
+    detector = YOLOMaterialDetector(weights_path="non_existent_weights_2026.pt", strict_mode=True)
     dummy_img = np.zeros((640, 640, 3), dtype=np.uint8)
 
     with pytest.raises(ModelWeightsNotFoundError):

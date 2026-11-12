@@ -14,7 +14,10 @@ from app.core.constants import UserRole
 from app.core.database import Base, get_db
 from app.core.security import create_access_token, get_password_hash
 from app.main import app
+import app.models as _all_models
 from app.models.user import User
+
+from sqlalchemy.pool import StaticPool
 
 # Test in-memory database
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -22,6 +25,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 
 TestingSessionLocal = async_sessionmaker(

@@ -6,6 +6,7 @@ import {
   DEV_MATERIALS,
   DEV_LISTINGS,
   DEV_NOTIFICATIONS,
+  NotificationItem,
 } from './mock/fixtures';
 import { DemolitionSite } from './types/site';
 import { MaterialItem, ValuationSummary } from './types/material';
@@ -43,6 +44,7 @@ export const App: React.FC = () => {
   const [projects, setProjects] = useState<DemolitionSite[]>(DEV_PROJECTS);
   const [materials, setMaterials] = useState<MaterialItem[]>(DEV_MATERIALS);
   const [listings, setListings] = useState<MarketplaceListing[]>(DEV_LISTINGS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(DEV_NOTIFICATIONS);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('prj-101');
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('mat-001');
 
@@ -154,7 +156,29 @@ export const App: React.FC = () => {
   };
 
   const summary = calculateDynamicSummary();
-  const unreadCount = DEV_NOTIFICATIONS.filter((n) => !n.is_read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const handleSendRfq = (buyer: any) => {
+    const newNotif: NotificationItem = {
+      id: `notif-${Date.now()}`,
+      type: 'BID_RECEIVED',
+      title: `RfQ Dispatched: ${buyer.name}`,
+      message: `Direct Request for Quotation (RfQ) sent to ${buyer.contact_person} (${buyer.email}) for site salvage streams. Estimated recovery value: $31,392 USD.`,
+      timestamp: new Date().toISOString(),
+      is_read: false,
+      priority: 'HIGH',
+      link_screen: 'buyers',
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
+
+  const handleMarkAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+  };
+
+  const handleMarkNotificationRead = (id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+  };
 
   // Handlers for state updates with optional live API synchronization
   const handleProjectCreated = (newProject: DemolitionSite) => {
@@ -300,6 +324,7 @@ export const App: React.FC = () => {
       {activeScreen === 'buyers' && (
         <BuyerRecyclerScreen
           onNavigateToScreen={navigateTo}
+          onSendRfq={handleSendRfq}
         />
       )}
 
@@ -313,6 +338,9 @@ export const App: React.FC = () => {
       {/* 14. Notifications */}
       {activeScreen === 'notifications' && (
         <NotificationsScreen
+          notifications={notifications}
+          onMarkAllAsRead={handleMarkAllNotificationsRead}
+          onMarkOneAsRead={handleMarkNotificationRead}
           onNavigateToScreen={navigateTo}
         />
       )}

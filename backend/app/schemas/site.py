@@ -17,6 +17,12 @@ class SiteBase(BaseModel):
     longitude: Optional[float] = Field(None, ge=-180.0, le=180.0)
     
     # Site information & structural attributes
+    building_type: Optional[str] = Field(None, description="Building typology, e.g. Industrial, Commercial, Warehouse")
+    building_length_m: Optional[float] = Field(None, ge=0.0, description="Building length in meters")
+    building_width_m: Optional[float] = Field(None, ge=0.0, description="Building width in meters")
+    building_height_m: Optional[float] = Field(None, ge=0.0, description="Building height in meters")
+    number_of_floors: Optional[int] = Field(None, ge=0, description="Number of above-ground/below-ground stories")
+    total_building_volume_m3: Optional[float] = Field(None, ge=0.0, description="Estimated total enclosed structure volume")
     footprint_sqm: Optional[float] = Field(None, ge=0.0, description="Gross structural area")
     structural_type: Optional[str] = None
     has_asbestos_risk: bool = Field(default=False)
@@ -41,6 +47,12 @@ class SiteUpdate(BaseModel):
     country: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    building_type: Optional[str] = None
+    building_length_m: Optional[float] = None
+    building_width_m: Optional[float] = None
+    building_height_m: Optional[float] = None
+    number_of_floors: Optional[int] = None
+    total_building_volume_m3: Optional[float] = None
     footprint_sqm: Optional[float] = None
     structural_type: Optional[str] = None
     has_asbestos_risk: Optional[bool] = None

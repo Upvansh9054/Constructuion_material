@@ -1,7 +1,9 @@
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     Column,
     Date,
+    DateTime,
     Enum,
     Float,
     ForeignKey,
@@ -31,19 +33,28 @@ class SiteSurvey(Base, BaseMixin):
         index=True,
     )
 
+    assessment_name = Column(String(255), nullable=True)
+    assessment_type = Column(String(100), default="PRE_DEMOLITION", nullable=False)
     survey_date = Column(Date, nullable=False)
     weather_condition = Column(String(100), nullable=True)
     survey_notes = Column(Text, nullable=True)
     status = Column(
         Enum(SurveyStatus), default=SurveyStatus.PENDING, nullable=False, index=True
     )
+    processing_status = Column(String(50), default="IDLE", nullable=False)  # IDLE, PROCESSING_MEDIA, MEDIA_READY, COMPLETED, FAILED
     total_images_count = Column(Integer, default=0, nullable=False)
+    processed_images_count = Column(Integer, default=0, nullable=False)
+    extracted_frames_count = Column(Integer, default=0, nullable=False)
 
     # Relationships
     site = relationship("DemolitionSite", back_populates="surveys")
     surveyor = relationship("User", back_populates="surveys")
     images = relationship(
-        "SurveyImage", back_populates="survey", cascade="all, delete-orphan", lazy="selectin"
+        "SurveyImage",
+        primaryjoin="and_(SurveyImage.survey_id == SiteSurvey.id, SurveyImage.deleted_at.is_(None))",
+        back_populates="survey",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     material_items = relationship(
         "MaterialItem", back_populates="survey", cascade="all, delete-orphan"
@@ -72,11 +83,28 @@ class SurveyImage(Base, BaseMixin):
     original_s3_key = Column(String(500), nullable=False)
     annotated_s3_key = Column(String(500), nullable=True)
     thumbnail_s3_key = Column(String(500), nullable=True)
+    cv_preprocessed_s3_key = Column(String(500), nullable=True)
 
     file_size_bytes = Column(BigInteger, nullable=False)
     mime_type = Column(String(100), nullable=False)
     width = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
+
+    # Video attributes & frame extraction hierarchy
+    is_extracted_frame = Column(Boolean, default=False, nullable=False)
+    parent_video_id = Column(
+        String(36), ForeignKey("survey_images.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    frame_index = Column(Integer, nullable=True)
+    timestamp_seconds = Column(Float, nullable=True)
+    duration_seconds = Column(Float, nullable=True)
+    fps = Column(Float, nullable=True)
+    codec = Column(String(50), nullable=True)
+
+    # Status & Error tracking
+    processing_status = Column(String(50), default="PROCESSED", nullable=False)  # PENDING, PROCESSED, FAILED
+    error_message = Column(Text, nullable=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     # Photogrammetry & Camera Calibration Parameters
     camera_altitude_m = Column(Float, nullable=True)
@@ -91,3 +119,15 @@ class SurveyImage(Base, BaseMixin):
     # Relationships
     survey = relationship("SiteSurvey", back_populates="images")
     material_items = relationship("MaterialItem", back_populates="source_image")
+    parent_video = relationship(
+        "SurveyImage",
+        remote_side="SurveyImage.id",
+        back_populates="extracted_frames",
+        foreign_keys=[parent_video_id],
+    )
+    extracted_frames = relationship(
+        "SurveyImage",
+        back_populates="parent_video",
+        cascade="all, delete-orphan",
+        foreign_keys=[parent_video_id],
+    )

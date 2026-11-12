@@ -18,9 +18,10 @@ import {
 
 interface BuyerRecyclerScreenProps {
   onNavigateToScreen: (screen: string) => void;
+  onSendRfq?: (buyer: BuyerRecycler) => void;
 }
 
-export const BuyerRecyclerScreen: React.FC<BuyerRecyclerScreenProps> = ({ onNavigateToScreen }) => {
+export const BuyerRecyclerScreen: React.FC<BuyerRecyclerScreenProps> = ({ onNavigateToScreen, onSendRfq }) => {
   const [buyers] = useState<BuyerRecycler[]>(DEV_BUYERS_RECYCLERS);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
@@ -36,8 +37,12 @@ export const BuyerRecyclerScreen: React.FC<BuyerRecyclerScreenProps> = ({ onNavi
   });
 
   const handleInviteToBid = (id: string) => {
+    const targetBuyer = buyers.find((b) => b.id === id);
     setInvitedId(id);
-    setTimeout(() => setInvitedId(null), 2500);
+    if (targetBuyer && onSendRfq) {
+      onSendRfq(targetBuyer);
+    }
+    setTimeout(() => setInvitedId(null), 3500);
   };
 
   return (

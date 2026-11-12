@@ -1,0 +1,12 @@
+path: D:/Construction_Material/backend/ai_pipeline/datasets/active_learning
+train: images/train
+val: images/val
+test: images/val
+names:
+  0: concrete
+  1: bricks
+  2: steel
+  3: timber
+  4: glass
+  5: mixed_debris
+nc: 6

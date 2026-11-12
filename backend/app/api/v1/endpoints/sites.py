@@ -29,8 +29,22 @@ async def create_demolition_site(
             detail=f"Site code '{site_in.site_code}' is already registered.",
         )
 
+    site_data = site_in.model_dump()
+    if (
+        not site_data.get("total_building_volume_m3")
+        and site_data.get("building_length_m")
+        and site_data.get("building_width_m")
+        and site_data.get("building_height_m")
+    ):
+        site_data["total_building_volume_m3"] = round(
+            float(site_data["building_length_m"])
+            * float(site_data["building_width_m"])
+            * float(site_data["building_height_m"]),
+            2,
+        )
+
     site = DemolitionSite(
-        **site_in.model_dump(),
+        **site_data,
         contractor_id=current_user.id,
     )
     db.add(site)

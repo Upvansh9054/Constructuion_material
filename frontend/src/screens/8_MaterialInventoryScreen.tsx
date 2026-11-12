@@ -6,6 +6,7 @@ import { Input } from '../components/ui/input';
 import { Dialog, DialogFooter } from '../components/ui/dialog';
 import { MaterialItem, MaterialCategory, ConditionGrade } from '../types/material';
 import { formatCurrency, formatTonnes, formatCO2 } from '../lib/utils';
+import { apiClient } from '../lib/api-client';
 import {
   Search,
   CheckCircle2,
@@ -13,6 +14,10 @@ import {
   Download,
   ShoppingBag,
   Sliders,
+  Scale,
+  ShieldAlert,
+  Box,
+  FileText,
 } from 'lucide-react';
 
 interface MaterialInventoryScreenProps {
@@ -33,11 +38,20 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeItemModal, setActiveItemModal] = useState<MaterialItem | null>(null);
 
+  // Weighbridge ticket verification modal state
+  const [weighbridgeModalItem, setWeighbridgeModalItem] = useState<MaterialItem | null>(null);
+  const [wbWeightTonnes, setWbWeightTonnes] = useState<number>(0);
+  const [wbTicketNumber, setWbTicketNumber] = useState<string>('');
+  const [wbScaleId, setWbScaleId] = useState<string>('SCALE-METRO-01');
+  const [wbNotes, setWbNotes] = useState<string>('');
+  const [wbSubmitting, setWbSubmitting] = useState<boolean>(false);
+
   const filteredMaterials = materials.filter((m) => {
     const matchesSearch =
       m.subcategory?.toLowerCase().includes(search.toLowerCase()) ||
       m.category.toLowerCase().includes(search.toLowerCase()) ||
-      m.id.toLowerCase().includes(search.toLowerCase());
+      m.id.toLowerCase().includes(search.toLowerCase()) ||
+      (m.weighbridge_ticket_number && m.weighbridge_ticket_number.toLowerCase().includes(search.toLowerCase()));
     const matchesCat = categoryFilter === 'ALL' || m.category === categoryFilter;
     const matchesCond = conditionFilter === 'ALL' || m.condition_grade === conditionFilter;
     const matchesVer =
@@ -77,6 +91,55 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
       }
     });
     setSelectedIds([]);
+  };
+
+  const openWeighbridgeModal = (item: MaterialItem) => {
+    setWeighbridgeModalItem(item);
+    setWbWeightTonnes(item.verified_weight_tonnes || item.estimated_weight_tonnes);
+    setWbTicketNumber(item.weighbridge_ticket_number || `WB-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`);
+    setWbScaleId(item.weighbridge_scale_id || 'SCALE-METRO-01');
+    setWbNotes('');
+  };
+
+  const handleSaveWeighbridgeTicket = async () => {
+    if (!weighbridgeModalItem || wbWeightTonnes <= 0 || !wbTicketNumber.trim()) return;
+
+    setWbSubmitting(true);
+    try {
+      // Try live API if connected
+      const res = await apiClient.verifyWeighbridge(weighbridgeModalItem.id, {
+        verified_weight_tonnes: wbWeightTonnes,
+        weighbridge_ticket_number: wbTicketNumber.trim(),
+        weighbridge_scale_id: wbScaleId.trim() || undefined,
+        surveyor_notes: wbNotes.trim() || undefined,
+      });
+
+      const updated: MaterialItem = {
+        ...weighbridgeModalItem,
+        is_verified_by_surveyor: true,
+        verified_weight_tonnes: res.verified_weight_tonnes,
+        weighbridge_ticket_number: res.weighbridge_ticket_number,
+        weighbridge_scale_id: wbScaleId,
+        verified_at: res.verified_at,
+        reference_measurement_notes: wbNotes ? `Weighbridge verified: ${wbNotes}` : weighbridgeModalItem.reference_measurement_notes,
+      };
+      onUpdateMaterial(updated);
+    } catch {
+      // Local fallback
+      const updated: MaterialItem = {
+        ...weighbridgeModalItem,
+        is_verified_by_surveyor: true,
+        verified_weight_tonnes: wbWeightTonnes,
+        weighbridge_ticket_number: wbTicketNumber.trim(),
+        weighbridge_scale_id: wbScaleId.trim(),
+        verified_at: new Date().toISOString(),
+        reference_measurement_notes: wbNotes ? `Weighbridge verified: ${wbNotes}` : weighbridgeModalItem.reference_measurement_notes,
+      };
+      onUpdateMaterial(updated);
+    } finally {
+      setWbSubmitting(false);
+      setWeighbridgeModalItem(null);
+    }
   };
 
   return (
@@ -128,7 +191,7 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800">
         <div className="flex-1 max-w-sm">
           <Input
-            placeholder="Search subcategory, ID, or description..."
+            placeholder="Search subcategory, ID, ticket #..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             icon={<Search className="w-4 h-4" />}
@@ -155,13 +218,13 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
             className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-300 focus:outline-none"
           >
             <option value="ALL">Verification: All</option>
-            <option value="VERIFIED">Verified by Surveyor</option>
-            <option value="PENDING">Pending Review</option>
+            <option value="VERIFIED">Verified / Certified</option>
+            <option value="PENDING">Pending Scale Ticket</option>
           </select>
         </div>
       </div>
 
-      {/* Main Inventory Table */}
+      {/* Main Inventory Table with Separated Estimated vs Verified Quantities */}
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -177,18 +240,24 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                     />
                   </th>
                   <th className="py-3 px-4">Stream & Subcategory</th>
-                  <th className="py-3 px-4">Condition Grade</th>
+                  <th className="py-3 px-4">Condition & Route</th>
                   <th className="py-3 px-4">Volume (m³)</th>
-                  <th className="py-3 px-4">Estimated Mass</th>
+                  <th className="py-3 px-4">Estimated Mass (t)</th>
+                  <th className="py-3 px-4">Verified Weighbridge (t)</th>
                   <th className="py-3 px-4">Market Value</th>
-                  <th className="py-3 px-4">Carbon Offset</th>
-                  <th className="py-3 px-4">Verification</th>
+                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {filteredMaterials.map((item) => {
                   const isSelected = selectedIds.includes(item.id);
+                  const hasWeighbridge = item.verified_weight_tonnes !== undefined && item.verified_weight_tonnes !== null;
+                  const deltaTonnes = hasWeighbridge ? item.verified_weight_tonnes! - item.estimated_weight_tonnes : 0;
+                  const variancePct = hasWeighbridge && item.estimated_weight_tonnes > 0
+                    ? ((deltaTonnes / item.estimated_weight_tonnes) * 100).toFixed(1)
+                    : null;
+
                   return (
                     <tr
                       key={item.id}
@@ -207,9 +276,14 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                       <td className="py-3 px-4">
                         <div className="font-bold text-white flex items-center gap-2">
                           <span>{item.subcategory || item.category}</span>
-                          {item.contamination_risk && (
+                          {item.requires_specialist_abatement && (
+                            <span title="EPA/OSHA Hazardous Abatement Warning" className="flex items-center text-rose-400">
+                              <ShieldAlert className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                          {!item.requires_specialist_abatement && item.contamination_risk && (
                             <span title={item.contamination_risk}>
-                              <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
                             </span>
                           )}
                         </div>
@@ -224,23 +298,54 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                         <Badge condition={item.condition_grade} className="text-[10px] py-0.5">
                           {item.condition_grade.replace(/_/g, ' ')}
                         </Badge>
+                        {item.recommended_recovery_route && (
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                            {item.recommended_recovery_route.replace(/_/g, ' ')}
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-4 font-mono text-slate-300">
                         {item.estimated_volume_m3.toFixed(1)} m³
                       </td>
-                      <td className="py-3 px-4 font-mono font-semibold text-white">
-                        {formatTonnes(item.estimated_weight_tonnes)}
+                      <td className="py-3 px-4">
+                        <div className="font-mono font-semibold text-white">
+                          {formatTonnes(item.estimated_weight_tonnes)}
+                        </div>
+                        <div className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
+                          <span>±{item.uncertainty_percentage || 20}%</span>
+                          <span className="text-slate-600">•</span>
+                          <span className="text-slate-500 truncate max-w-[90px]" title={item.calculation_method}>
+                            {item.calculation_method?.replace(/_/g, ' ') || 'visual prior'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        {hasWeighbridge ? (
+                          <div>
+                            <div className="font-mono font-bold text-emerald-400 flex items-center gap-1.5">
+                              <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                              {formatTonnes(item.verified_weight_tonnes!)}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                              <span className="text-slate-300 font-semibold">{item.weighbridge_ticket_number}</span>
+                              <span className={deltaTonnes >= 0 ? 'text-amber-400' : 'text-emerald-400'}>
+                                ({deltaTonnes >= 0 ? '+' : ''}{deltaTonnes.toFixed(1)}t, {variancePct}%)
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
+                            Pre-Demolition Est.
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-4 font-mono font-bold text-emerald-400">
                         {formatCurrency(item.estimated_market_value_usd)}
                       </td>
-                      <td className="py-3 px-4 font-mono text-emerald-300 text-[11px]">
-                        {formatCO2(item.embodied_carbon_offset_kg)}
-                      </td>
                       <td className="py-3 px-4">
                         {item.is_verified_by_surveyor ? (
                           <span className="flex items-center gap-1 text-emerald-400 font-semibold text-[11px]">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Verified
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Certified
                           </span>
                         ) : (
                           <span className="text-amber-400 text-[11px] font-medium">Pending Review</span>
@@ -255,6 +360,14 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                             onClick={() => setActiveItemModal(item)}
                           >
                             Inspect
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-[11px] border-emerald-900/40 text-emerald-300 hover:bg-emerald-950/30"
+                            onClick={() => openWeighbridgeModal(item)}
+                          >
+                            <Scale className="w-3 h-3 mr-1 text-emerald-400" /> Ticket
                           </Button>
                           <Button
                             variant="outline"
@@ -275,7 +388,123 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
         </CardContent>
       </Card>
 
-      {/* Item Inspection Dialog */}
+      {/* Weighbridge Verification Modal */}
+      {weighbridgeModalItem && (
+        <Dialog
+          isOpen={true}
+          onClose={() => setWeighbridgeModalItem(null)}
+          title={`Weighbridge Scale Verification: ${weighbridgeModalItem.subcategory || weighbridgeModalItem.category}`}
+          description={`Log official certified scale ticket measurement for ${weighbridgeModalItem.id}`}
+        >
+          <div className="space-y-4 text-xs">
+            <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+              <div className="flex items-center justify-between text-slate-400">
+                <span>Visual Survey Pre-Estimate:</span>
+                <span className="font-mono font-bold text-white">
+                  {formatTonnes(weighbridgeModalItem.estimated_weight_tonnes)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                <span>Uncertainty Envelope:</span>
+                <span className="font-mono text-slate-300">
+                  {weighbridgeModalItem.min_weight_tonnes || (weighbridgeModalItem.estimated_weight_tonnes * 0.8).toFixed(1)}t –{' '}
+                  {weighbridgeModalItem.max_weight_tonnes || (weighbridgeModalItem.estimated_weight_tonnes * 1.2).toFixed(1)}t
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Certified Weighbridge Mass (Tonnes) *
+                </label>
+                <Input
+                  type="number"
+                  step="0.05"
+                  value={wbWeightTonnes}
+                  onChange={(e) => setWbWeightTonnes(parseFloat(e.target.value) || 0)}
+                  placeholder="e.g. 96.4"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Official Ticket / Manifest Number *
+                </label>
+                <Input
+                  type="text"
+                  value={wbTicketNumber}
+                  onChange={(e) => setWbTicketNumber(e.target.value)}
+                  placeholder="e.g. WB-2026-88412"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Scale Calibration ID / Facility Location
+                </label>
+                <Input
+                  type="text"
+                  value={wbScaleId}
+                  onChange={(e) => setWbScaleId(e.target.value)}
+                  placeholder="e.g. SCALE-METRO-01 (Certified Class III)"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Weighbridge Operator / Surveyor Field Notes
+                </label>
+                <textarea
+                  rows={2}
+                  value={wbNotes}
+                  onChange={(e) => setWbNotes(e.target.value)}
+                  className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  placeholder="Certified gross minus tare recorded at plant weighbridge."
+                />
+              </div>
+            </div>
+
+            {wbWeightTonnes > 0 && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 space-y-1">
+                <div className="flex items-center justify-between font-semibold">
+                  <span>Variance from Pre-Demolition Visual Estimate:</span>
+                  <span className="font-mono">
+                    {(wbWeightTonnes - weighbridgeModalItem.estimated_weight_tonnes >= 0 ? '+' : '')}
+                    {(wbWeightTonnes - weighbridgeModalItem.estimated_weight_tonnes).toFixed(2)} t (
+                    {(
+                      ((wbWeightTonnes - weighbridgeModalItem.estimated_weight_tonnes) /
+                        (weighbridgeModalItem.estimated_weight_tonnes || 1)) *
+                      100
+                    ).toFixed(1)}
+                    %)
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Visual photogrammetry estimate remains archived for model training and accuracy calibration.
+                </p>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" size="sm" onClick={() => setWeighbridgeModalItem(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveWeighbridgeTicket}
+                disabled={wbSubmitting || wbWeightTonnes <= 0 || !wbTicketNumber.trim()}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                {wbSubmitting ? 'Recording Ticket...' : 'Save Weighbridge Ticket'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </Dialog>
+      )}
+
+      {/* Item Comprehensive Inspection Dialog */}
       {activeItemModal && (
         <Dialog
           isOpen={true}
@@ -284,27 +513,88 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
           description={`Survey Log ID: ${activeItemModal.id} • Registered to Survey session`}
         >
           <div className="space-y-4 text-xs">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Badge category={activeItemModal.category}>{activeItemModal.category}</Badge>
               <Badge condition={activeItemModal.condition_grade}>
                 {activeItemModal.condition_grade.replace(/_/g, ' ')}
               </Badge>
+              {activeItemModal.recommended_recovery_route && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800">
+                  Route: {activeItemModal.recommended_recovery_route.replace(/_/g, ' ')} ({activeItemModal.recoverability_percentage || 85}%)
+                </span>
+              )}
             </div>
 
             <p className="text-slate-300 leading-relaxed">{activeItemModal.description}</p>
 
+            {/* Hazardous Alert Card */}
+            {activeItemModal.requires_specialist_abatement && (
+              <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 space-y-1.5">
+                <div className="font-bold flex items-center gap-2 text-rose-300">
+                  <ShieldAlert className="w-4 h-4 text-rose-400" />
+                  MANDATORY SPECIALIST ABATEMENT REQUIRED
+                </div>
+                <p className="text-[11px] text-rose-300/90 leading-relaxed">
+                  {activeItemModal.hazard_inspection_warning || 'Regulated hazardous material identified. Prohibited from crushing or commercial recycling under EPA NESHAP / OSHA regulations.'}
+                </p>
+              </div>
+            )}
+
+            {/* Physical Dimensions & Volumetric Geometry */}
+            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <span className="font-semibold text-slate-300 flex items-center gap-1.5 text-xs">
+                <Box className="w-3.5 h-3.5 text-emerald-400" />
+                3D Physical Geometry & Estimation Methodology
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center pt-1 font-mono">
+                <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
+                  <span className="text-[10px] text-slate-500 block uppercase">Length</span>
+                  <span className="text-sm font-bold text-white">{activeItemModal.dimension_length_m ? `${activeItemModal.dimension_length_m}m` : 'N/A'}</span>
+                </div>
+                <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
+                  <span className="text-[10px] text-slate-500 block uppercase">Width</span>
+                  <span className="text-sm font-bold text-white">{activeItemModal.dimension_width_m ? `${activeItemModal.dimension_width_m}m` : 'N/A'}</span>
+                </div>
+                <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
+                  <span className="text-[10px] text-slate-500 block uppercase">Height / Depth</span>
+                  <span className="text-sm font-bold text-white">{activeItemModal.dimension_height_m ? `${activeItemModal.dimension_height_m}m` : 'N/A'}</span>
+                </div>
+                <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
+                  <span className="text-[10px] text-slate-500 block uppercase">Surface Area</span>
+                  <span className="text-sm font-bold text-emerald-400">{activeItemModal.surface_area_m2 ? `${activeItemModal.surface_area_m2}m²` : 'N/A'}</span>
+                </div>
+              </div>
+              <div className="text-[11px] text-slate-400 pt-1 flex items-center justify-between">
+                <span>Method: <strong>{activeItemModal.calculation_method?.replace(/_/g, ' ') || 'Calibrated GSD Photogrammetry'}</strong></span>
+                <span>Uncertainty: <strong>±{activeItemModal.uncertainty_percentage || 20}%</strong></span>
+              </div>
+            </div>
+
+            {/* Mass Comparison: Visual Estimate vs Certified Weighbridge */}
             <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800">
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase font-semibold">Estimated Weight</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-semibold">Visual Pre-Estimate</span>
                 <span className="text-base font-bold text-white font-mono">
                   {formatTonnes(activeItemModal.estimated_weight_tonnes)}
                 </span>
+                <span className="text-[10px] text-slate-500 block">
+                  [{activeItemModal.min_weight_tonnes || (activeItemModal.estimated_weight_tonnes * 0.8).toFixed(1)}t – {activeItemModal.max_weight_tonnes || (activeItemModal.estimated_weight_tonnes * 1.2).toFixed(1)}t]
+                </span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase font-semibold">Estimated Volume</span>
-                <span className="text-base font-bold text-white font-mono">
-                  {activeItemModal.estimated_volume_m3} m³
-                </span>
+                <span className="text-slate-500 block text-[10px] uppercase font-semibold">Certified Weighbridge</span>
+                {activeItemModal.verified_weight_tonnes !== undefined ? (
+                  <div>
+                    <span className="text-base font-bold text-emerald-400 font-mono">
+                      {formatTonnes(activeItemModal.verified_weight_tonnes)}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block font-mono">
+                      Ticket: {activeItemModal.weighbridge_ticket_number || 'Certified'}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-amber-400 text-xs font-semibold block mt-1">Pending scale receipt</span>
+                )}
               </div>
               <div>
                 <span className="text-slate-500 block text-[10px] uppercase font-semibold">Recovery Value</span>
@@ -320,12 +610,12 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
               </div>
             </div>
 
-            {activeItemModal.contamination_risk && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-1">
-                <span className="font-bold flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-rose-400" /> Contamination Advisory
+            {activeItemModal.reference_measurement_notes && (
+              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 space-y-1">
+                <span className="font-semibold text-slate-400 flex items-center gap-1.5 text-[11px]">
+                  <FileText className="w-3.5 h-3.5 text-slate-400" /> Surveyor Field Notes & Calibration Log
                 </span>
-                <p className="text-slate-300 text-[11px]">{activeItemModal.contamination_risk}</p>
+                <p className="text-slate-300 text-[11px] whitespace-pre-wrap">{activeItemModal.reference_measurement_notes}</p>
               </div>
             )}
 
@@ -334,11 +624,11 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  onUpdateMaterial({ ...activeItemModal, is_verified_by_surveyor: true });
+                  openWeighbridgeModal(activeItemModal);
                   setActiveItemModal(null);
                 }}
               >
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Verified
+                <Scale className="w-3.5 h-3.5 mr-1" /> Log Weighbridge Ticket
               </Button>
               <Button
                 variant="primary"

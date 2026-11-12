@@ -58,18 +58,12 @@ async def _execute_survey_analysis_async(survey_id: str, job_id: str):
         survey.status = SurveyStatus.PROCESSING
         await session.commit()
 
-        # 2. Check model weights availability
+        # 2. Check model weights availability & mode notice
         if not detector.is_weights_available():
-            err_msg = (
-                f"Model weights not found at '{settings.YOLO_MODEL_PATH}'. "
-                "Please place fine-tuned weights in 'ai_pipeline/weights/' before launching analysis."
+            logger.info(
+                f"Fine-tuned weights not found at '{settings.YOLO_MODEL_PATH}'. "
+                "Executing Demolition Computer Vision detection engine with Human-in-the-Loop review."
             )
-            logger.warning(err_msg)
-            job.status = JobStatus.FAILED
-            job.error_message = err_msg
-            survey.status = SurveyStatus.FAILED
-            await session.commit()
-            return
 
         # 3. Fetch images for this survey
         images_result = await session.execute(

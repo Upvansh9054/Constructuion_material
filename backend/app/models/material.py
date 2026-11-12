@@ -1,6 +1,7 @@
 from sqlalchemy import (
     Boolean,
     Column,
+    DateTime,
     Enum,
     Float,
     ForeignKey,
@@ -57,15 +58,38 @@ class MaterialItem(Base, BaseMixin):
         index=True,
     )
 
-    # Module 9: Volumetric and Physical Quantities
+    # Module 9: Volumetric, Dimensional, and Physical Quantities
     estimated_volume_m3 = Column(Float, nullable=False, default=0.0)
     estimated_weight_tonnes = Column(Float, nullable=False, default=0.0)
-    unit_count = Column(Integer, nullable=True)
+    dimension_length_m = Column(Float, nullable=True)
+    dimension_width_m = Column(Float, nullable=True)
+    dimension_height_m = Column(Float, nullable=True)
+    surface_area_m2 = Column(Float, nullable=True)
+
+    # Uncertainty boundaries (±%)
+    min_volume_m3 = Column(Float, nullable=True)
+    max_volume_m3 = Column(Float, nullable=True)
+    min_weight_tonnes = Column(Float, nullable=True)
+    max_weight_tonnes = Column(Float, nullable=True)
+    uncertainty_percentage = Column(Float, default=20.0, nullable=False)
+
+    # Configurable assumptions applied
+    assumed_density_t_per_m3 = Column(Float, default=2.40, nullable=False)
     packing_factor = Column(Float, default=0.85, nullable=False)
     calculation_method = Column(String(100), default="calibrated_gsd_photogrammetry", nullable=False)
+    reference_measurement_notes = Column(String(255), nullable=True)
+    unit_count = Column(Integer, nullable=True)
 
-    # Contamination & Safety Hazards (Asbestos, Lead, Mortar, Moisture)
+    # Contamination & Safety Hazards (Asbestos ACM, Lead, Creosote, Mortar)
     contamination_risk = Column(String(255), nullable=True)
+    damage_severity_pct = Column(Float, default=0.0, nullable=False)
+    damage_type = Column(String(100), nullable=True)
+    requires_specialist_abatement = Column(Boolean, default=False, nullable=False)
+    hazard_inspection_warning = Column(Text, nullable=True)
+
+    # Recoverability & Circular Economy
+    recommended_recovery_route = Column(String(100), default="CLOSED_LOOP_RECYCLING", nullable=False)
+    recoverability_percentage = Column(Float, default=85.0, nullable=False)
 
     # AI Model confidence & Spatial Metadata
     confidence_score = Column(Float, nullable=True)
@@ -76,7 +100,7 @@ class MaterialItem(Base, BaseMixin):
     estimated_market_value_usd = Column(Float, default=0.0, nullable=False)
     embodied_carbon_offset_kg = Column(Float, default=0.0, nullable=False)
 
-    # Human Surveyor Verification & Certification
+    # Human Surveyor Verification & Certified Weighbridge Storage (Stored Separately)
     is_verified_by_surveyor = Column(Boolean, default=False, nullable=False, index=True)
     surveyor_adjustment_notes = Column(Text, nullable=True)
     verified_by_user_id = Column(
@@ -84,6 +108,12 @@ class MaterialItem(Base, BaseMixin):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
+    verified_weight_tonnes = Column(Float, nullable=True)
+    verified_volume_m3 = Column(Float, nullable=True)
+    weighbridge_ticket_number = Column(String(100), nullable=True)
+    weighbridge_scale_id = Column(String(100), nullable=True)
+    weighbridge_timestamp = Column(DateTime(timezone=True), nullable=True)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     survey = relationship("SiteSurvey", back_populates="material_items")

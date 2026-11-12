@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, Enum, Float, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, Date, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.core.constants import SiteStatus
@@ -22,6 +22,12 @@ class DemolitionSite(Base, BaseMixin):
     longitude = Column(Float, nullable=True)
 
     # Site information & structural attributes
+    building_type = Column(String(100), nullable=True)  # e.g. Industrial, Commercial, Residential, Warehouse
+    building_length_m = Column(Float, nullable=True)
+    building_width_m = Column(Float, nullable=True)
+    building_height_m = Column(Float, nullable=True)
+    number_of_floors = Column(Integer, nullable=True)
+    total_building_volume_m3 = Column(Float, nullable=True)
     footprint_sqm = Column(Float, nullable=True)
     structural_type = Column(String(150), nullable=True)  # e.g. "Steel Frame & Concrete Shear Wall"
     has_asbestos_risk = Column(Boolean, default=False, nullable=False)
