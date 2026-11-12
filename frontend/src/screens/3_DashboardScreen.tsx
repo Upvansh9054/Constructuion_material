@@ -55,10 +55,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       {/* Top Banner / Project Context */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-900/40 shadow-xl">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            Active Survey Mission • Chicago Metro Logistics Hub
-          </div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             Demolition Material Intelligence Overview
           </h2>

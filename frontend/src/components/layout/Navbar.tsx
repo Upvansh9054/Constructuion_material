@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Bell, User, Activity } from 'lucide-react';
+import { ShieldCheck, Bell, User } from 'lucide-react';
 import { NavScreenId } from './Sidebar';
 
 interface NavbarProps {
@@ -45,14 +45,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <p className="text-[11px] text-slate-400 mt-0.5">Material Recovery & Circular Economy</p>
           </div>
         </button>
-      </div>
-
-      {/* Middle Telemetry Status */}
-      <div className="hidden lg:flex items-center gap-4">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300">
-          <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-          <span className="font-mono text-[11px]">YOLOv8x Inference Engine: Operational</span>
-        </div>
       </div>
 
       {/* Right Controls */}
