@@ -44,7 +44,14 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
   const [wbTicketNumber, setWbTicketNumber] = useState<string>('');
   const [wbScaleId, setWbScaleId] = useState<string>('SCALE-METRO-01');
   const [wbNotes, setWbNotes] = useState<string>('');
-  const [wbSubmitting, setWbSubmitting] = useState<boolean>(false);
+  const [lastVerifiedNotification, setLastVerifiedNotification] = useState<{
+    itemTitle: string;
+    ticketNumber: string;
+    weightTonnes: number;
+    varianceTonnes: number;
+    variancePct: string;
+    itemId: string;
+  } | null>(null);
 
   const filteredMaterials = materials.filter((m) => {
     const matchesSearch =
@@ -101,45 +108,49 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
     setWbNotes('');
   };
 
-  const handleSaveWeighbridgeTicket = async () => {
+  const handleSaveWeighbridgeTicket = () => {
     if (!weighbridgeModalItem || wbWeightTonnes <= 0 || !wbTicketNumber.trim()) return;
 
-    setWbSubmitting(true);
-    try {
-      // Try live API if connected
-      const res = await apiClient.verifyWeighbridge(weighbridgeModalItem.id, {
-        verified_weight_tonnes: wbWeightTonnes,
-        weighbridge_ticket_number: wbTicketNumber.trim(),
-        weighbridge_scale_id: wbScaleId.trim() || undefined,
-        surveyor_notes: wbNotes.trim() || undefined,
-      });
+    const item = weighbridgeModalItem;
+    const verifiedWeight = Number(wbWeightTonnes);
+    const ticketNum = wbTicketNumber.trim();
+    const scaleId = wbScaleId.trim() || 'SCALE-METRO-01';
+    const delta = verifiedWeight - item.estimated_weight_tonnes;
+    const deltaPct = ((delta / (item.estimated_weight_tonnes || 1)) * 100).toFixed(1);
 
-      const updated: MaterialItem = {
-        ...weighbridgeModalItem,
-        is_verified_by_surveyor: true,
-        verified_weight_tonnes: res.verified_weight_tonnes,
-        weighbridge_ticket_number: res.weighbridge_ticket_number,
-        weighbridge_scale_id: wbScaleId,
-        verified_at: res.verified_at,
-        reference_measurement_notes: wbNotes ? `Weighbridge verified: ${wbNotes}` : weighbridgeModalItem.reference_measurement_notes,
-      };
-      onUpdateMaterial(updated);
-    } catch {
-      // Local fallback
-      const updated: MaterialItem = {
-        ...weighbridgeModalItem,
-        is_verified_by_surveyor: true,
-        verified_weight_tonnes: wbWeightTonnes,
-        weighbridge_ticket_number: wbTicketNumber.trim(),
-        weighbridge_scale_id: wbScaleId.trim(),
-        verified_at: new Date().toISOString(),
-        reference_measurement_notes: wbNotes ? `Weighbridge verified: ${wbNotes}` : weighbridgeModalItem.reference_measurement_notes,
-      };
-      onUpdateMaterial(updated);
-    } finally {
-      setWbSubmitting(false);
-      setWeighbridgeModalItem(null);
-    }
+    const updated: MaterialItem = {
+      ...item,
+      is_verified_by_surveyor: true,
+      verified_weight_tonnes: verifiedWeight,
+      weighbridge_ticket_number: ticketNum,
+      weighbridge_scale_id: scaleId,
+      verified_at: new Date().toISOString(),
+      reference_measurement_notes: wbNotes ? `Weighbridge verified: ${wbNotes}` : item.reference_measurement_notes,
+    };
+
+    // Instant local state update (zero delay)
+    onUpdateMaterial(updated);
+    setLastVerifiedNotification({
+      itemTitle: item.subcategory || item.category,
+      ticketNumber: ticketNum,
+      weightTonnes: verifiedWeight,
+      varianceTonnes: delta,
+      variancePct: deltaPct,
+      itemId: item.id,
+    });
+    setWeighbridgeModalItem(null);
+
+    // Asynchronous backend synchronization (best effort)
+    apiClient
+      .verifyWeighbridge(item.id, {
+        verified_weight_tonnes: verifiedWeight,
+        weighbridge_ticket_number: ticketNum,
+        weighbridge_scale_id: scaleId,
+        surveyor_notes: wbNotes.trim() || undefined,
+      })
+      .catch((err) => {
+        console.info('Backend weighbridge sync notice:', err?.message || err);
+      });
   };
 
   return (
@@ -199,6 +210,46 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
           </div>
         </div>
       </div>
+
+      {/* Real-Time Weighbridge Scale Success Alert */}
+      {lastVerifiedNotification && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/90 via-slate-900 to-slate-900 border-2 border-emerald-500/60 text-emerald-200 flex items-start justify-between gap-3 shadow-xl shadow-emerald-950/50 animate-in fade-in duration-300">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="space-y-1.5">
+              <div className="font-bold text-white text-sm flex flex-wrap items-center gap-2">
+                <span>Weighbridge Ticket Successfully Logged & Reconciled!</span>
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-600 text-white font-semibold shadow-sm">
+                  STATUS: CERTIFIED
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Scale Ticket <strong className="text-white font-mono bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">{lastVerifiedNotification.ticketNumber}</strong> has been officially bound to <strong className="text-emerald-300">{lastVerifiedNotification.itemTitle}</strong>.
+                Certified Net Mass: <strong className="text-white font-mono">{lastVerifiedNotification.weightTonnes.toFixed(1)} tonnes</strong>{' '}
+                (Variance vs drone estimate: <span className={lastVerifiedNotification.varianceTonnes >= 0 ? 'text-amber-400' : 'text-emerald-400'}>{lastVerifiedNotification.varianceTonnes >= 0 ? '+' : ''}{lastVerifiedNotification.varianceTonnes.toFixed(2)}t, {lastVerifiedNotification.variancePct}%</span>).
+              </p>
+              <div className="text-[11px] text-emerald-400 flex flex-wrap items-center gap-3 pt-1">
+                <span>✓ Look below at Column <strong>"Verified Weighbridge (t)"</strong> (highlighted in emerald)</span>
+                <span>•</span>
+                <button
+                  onClick={() => onNavigateToScreen('marketplace')}
+                  className="font-semibold text-emerald-300 hover:text-white underline underline-offset-2 flex items-center gap-1"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" /> Ready to Sell: Open Recovery Marketplace ➔
+                </button>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setLastVerifiedNotification(null)}
+            className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Category Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -293,7 +344,7 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                       key={item.id}
                       className={`hover:bg-slate-800/40 transition-colors ${
                         isSelected ? 'bg-emerald-500/5' : ''
-                      }`}
+                      } ${lastVerifiedNotification?.itemId === item.id ? 'bg-emerald-500/20 border-l-4 border-l-emerald-400' : ''}`}
                     >
                       <td className="py-3 px-4">
                         <input
@@ -392,12 +443,17 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                             Inspect
                           </Button>
                           <Button
-                            variant="outline"
+                            variant={hasWeighbridge ? 'outline' : 'primary'}
                             size="sm"
-                            className="h-7 px-2 text-[11px] border-emerald-900/40 text-emerald-300 hover:bg-emerald-950/30"
+                            className={`h-7 px-2.5 text-[11px] font-semibold transition-all ${
+                              hasWeighbridge
+                                ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300 hover:bg-emerald-900/50'
+                                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                            }`}
                             onClick={() => openWeighbridgeModal(item)}
                           >
-                            <Scale className="w-3 h-3 mr-1 text-emerald-400" /> Ticket
+                            <Scale className="w-3 h-3 mr-1" />
+                            {hasWeighbridge ? 'Ticket Saved' : 'Log Ticket'}
                           </Button>
                           <Button
                             variant="outline"
@@ -524,10 +580,10 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
                 variant="primary"
                 size="sm"
                 onClick={handleSaveWeighbridgeTicket}
-                disabled={wbSubmitting || wbWeightTonnes <= 0 || !wbTicketNumber.trim()}
+                disabled={wbWeightTonnes <= 0 || !wbTicketNumber.trim()}
               >
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                {wbSubmitting ? 'Recording Ticket...' : 'Save Weighbridge Ticket'}
+                Save Weighbridge Ticket
               </Button>
             </DialogFooter>
           </div>

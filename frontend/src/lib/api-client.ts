@@ -126,18 +126,31 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(url, { ...options, headers });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-    if (!response.ok) {
-      const errorBody = await response.json().catch(() => ({}));
-      throw new Error(errorBody.detail || `Request failed with status ${response.status}`);
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        signal: options.signal || controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        throw new Error(errorBody.detail || `Request failed with status ${response.status}`);
+      }
+
+      if (response.status === 204) {
+        return null as T;
+      }
+
+      return response.json();
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
     }
-
-    if (response.status === 204) {
-      return null as T;
-    }
-
-    return response.json();
   }
 
   // --- Auth (Module 1, 2) ---
