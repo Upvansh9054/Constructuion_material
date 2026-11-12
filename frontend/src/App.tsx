@@ -220,6 +220,31 @@ export const App: React.FC = () => {
     });
   };
 
+  const handleSwitchRole = (newRole: 'SURVEYOR' | 'CONTRACTOR' | 'BUYER') => {
+    if (newRole === 'SURVEYOR') {
+      setUser({
+        email: 'surveyor@certifiedaudit.com',
+        role: 'SURVEYOR',
+        name: 'Sarah Lindqvist (Surveyor)',
+      });
+      navigateTo('upload');
+    } else if (newRole === 'CONTRACTOR') {
+      setUser({
+        email: 'contractor@apex-demolition.com',
+        role: 'CONTRACTOR',
+        name: 'Marcus Thorne (Contractor)',
+      });
+      navigateTo('dashboard');
+    } else {
+      setUser({
+        email: 'elena@midwest-steel.com',
+        role: 'BUYER',
+        name: 'Elena Vance (Off-Taker)',
+      });
+      navigateTo('marketplace');
+    }
+  };
+
   // Standalone Fullscreen Views (Landing Page and Auth Screen)
   if (activeScreen === 'landing') {
     return (
@@ -243,7 +268,7 @@ export const App: React.FC = () => {
           if (userData.role === 'BUYER' || userData.role === 'MATERIAL_BUYER') {
             navigateTo('marketplace');
           } else if (userData.role === 'SURVEYOR') {
-            navigateTo('analysis');
+            navigateTo('upload');
           } else {
             navigateTo('dashboard');
           }
@@ -261,6 +286,7 @@ export const App: React.FC = () => {
       unreadCount={unreadCount}
       user={user}
       onLogout={() => navigateTo('landing')}
+      onSwitchRole={handleSwitchRole}
     >
       {/* 3. Main Dashboard */}
       {activeScreen === 'dashboard' && (

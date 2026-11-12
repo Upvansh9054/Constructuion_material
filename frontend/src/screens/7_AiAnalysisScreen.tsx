@@ -179,8 +179,14 @@ export const AiAnalysisScreen: React.FC<AiAnalysisScreenProps> = ({
           <Button variant="outline" size="sm" onClick={() => onNavigateToScreen('upload')}>
             <RefreshCw className="w-3.5 h-3.5 mr-1" /> Site Media Hub
           </Button>
-          <Button variant="primary" size="sm" onClick={onProceedToInventory}>
-            Transfer to Inventory <ArrowRight className="w-3.5 h-3.5 ml-1" />
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onProceedToInventory}
+            className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+            Audit Complete: Hand Over to Contractor <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </Button>
         </div>
       </div>

@@ -45,6 +45,7 @@ ai_pipeline/weights/*.onnx
 ai_pipeline/weights/*.engine
 ai_pipeline/weights/*.bin
 !ai_pipeline/weights/.gitkeep
+ai_pipeline/datasets/
 *.h5
 *.tflite
 *.safetensors

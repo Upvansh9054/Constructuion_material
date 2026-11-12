@@ -153,7 +153,7 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {selectedIds.length > 0 && (
             <Button variant="primary" size="sm" onClick={handleBulkVerify}>
               <CheckCircle2 className="w-4 h-4 mr-1" />
@@ -163,10 +163,40 @@ export const MaterialInventoryScreen: React.FC<MaterialInventoryScreenProps> = (
           <Button
             variant="outline"
             size="sm"
+            onClick={() => onNavigateToScreen('marketplace')}
+            className="border-emerald-800/40 text-emerald-400 hover:bg-emerald-950/40"
+          >
+            <ShoppingBag className="w-4 h-4 mr-1" /> Marketplace
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onNavigateToScreen('reports')}
+          >
+            <FileText className="w-4 h-4 mr-1" /> DMAR Permit
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => alert('Exporting circular material inventory manifest to CSV...')}
           >
             <Download className="w-4 h-4 mr-1" /> Export CSV
           </Button>
+        </div>
+      </div>
+
+      {/* Handover & Workflow Banner */}
+      <div className="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-900/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="font-semibold text-white">Step 2: Pre-Demolition Audit Verified by Licensed Surveyor</span>
+            <p className="text-slate-400 text-[11px]">
+              Tonnage and condition grades calibrated via drone photogrammetry. Contractor logs weighbridge tickets at the scale, sells materials on the marketplace, and generates EPA DMAR reports.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -8,6 +8,7 @@ interface PageLayoutProps {
   unreadCount?: number;
   user: { email: string; role: string; name: string };
   onLogout?: () => void;
+  onSwitchRole?: (role: 'SURVEYOR' | 'CONTRACTOR' | 'BUYER') => void;
   children: React.ReactNode;
 }
 
@@ -17,6 +18,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   unreadCount = 2,
   user,
   onLogout,
+  onSwitchRole,
   children,
 }) => {
   return (
@@ -25,6 +27,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         onNavigateToScreen={onSelectScreen}
         unreadCount={unreadCount}
         user={user}
+        onSwitchRole={onSwitchRole}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar

@@ -22,3 +22,4 @@ if os.getenv("VERCEL") == "1":
         asyncio.run(init_vercel_db())
     except Exception as exc:
         print(f"Vercel DB initialization warning: {exc}")
+
