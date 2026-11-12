@@ -123,30 +123,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
       },
     ];
   } else {
-    // Demolition Contractor / Admin (Full Access)
+    // Demolition Contractor (Streamlined: Operations, Inventory & Weighbridge, Commerce, Permits)
     navSections = [
       {
-        title: 'Operations Overview',
+        title: 'Site Operations',
         items: [
           { id: 'dashboard', label: 'Main Dashboard', icon: LayoutDashboard },
           { id: 'projects', label: 'Demolition Sites', icon: Building2, badge: '5' },
           { id: 'create-project', label: 'Register New Site', icon: PlusCircle },
-          { id: 'upload', label: 'Site Media Upload', icon: Camera },
         ],
       },
       {
-        title: 'AI Intelligence & Scans',
+        title: 'Material Assets & Weighbridge',
         items: [
-          { id: 'analysis', label: 'AI Material Vision', icon: Cpu },
-          { id: 'inventory', label: 'Material Inventory', icon: Layers, badge: '9' },
-          { id: 'assessment', label: 'Quantity & Condition', icon: Sliders },
-          { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
+          { id: 'inventory', label: 'Material Inventory & Scale', icon: Layers, badge: '9' },
+          { id: 'recovery', label: 'Recovery Valuation & Carbon', icon: DollarSign },
         ],
       },
       {
         title: 'Circular Commerce',
         items: [
-          { id: 'marketplace', label: 'Recovery Market', icon: ShoppingBag, badge: '4' },
+          { id: 'marketplace', label: 'Recovery Market (Lots)', icon: ShoppingBag, badge: '4' },
           { id: 'buyers', label: 'Certified Off-Takers', icon: Users },
           { id: 'reports', label: 'DMAR Compliance Reports', icon: FileText },
         ],
@@ -155,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         title: 'System & Platform',
         items: [
           { id: 'notifications', label: 'Alerts & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
-          { id: 'settings', label: 'Profile & Settings', icon: Settings },
+          { id: 'settings', label: 'Contractor Profile', icon: Settings },
           { id: 'landing', label: 'Public Portal', icon: Globe },
         ],
       },

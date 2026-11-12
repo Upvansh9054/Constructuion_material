@@ -21,17 +21,20 @@ import {
   MapPin,
   Leaf,
   PlusCircle,
+  ShoppingBag,
 } from 'lucide-react';
 
 interface DashboardScreenProps {
   projects: DemolitionSite[];
   summary: ValuationSummary;
+  userRole?: string;
   onNavigateToScreen: (screen: string, contextId?: string) => void;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   projects,
   summary,
+  userRole,
   onNavigateToScreen,
 }) => {
   // Computed metrics reflecting the 7 mandatory dashboard requirements
@@ -66,12 +69,25 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <Button variant="outline" size="sm" onClick={() => onNavigateToScreen('upload')}>
-            <Upload className="w-4 h-4 mr-1" /> Upload Survey Imagery
-          </Button>
-          <Button variant="primary" size="sm" onClick={() => onNavigateToScreen('analysis')}>
-            <Cpu className="w-4 h-4 mr-1" /> Run AI Vision Pipeline
-          </Button>
+          {userRole === 'SURVEYOR' ? (
+            <>
+              <Button variant="outline" size="sm" onClick={() => onNavigateToScreen('upload')}>
+                <Upload className="w-4 h-4 mr-1" /> Upload Survey Imagery
+              </Button>
+              <Button variant="primary" size="sm" onClick={() => onNavigateToScreen('analysis')}>
+                <Cpu className="w-4 h-4 mr-1" /> Run AI Vision Pipeline
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" onClick={() => onNavigateToScreen('inventory')}>
+                <Layers className="w-4 h-4 mr-1" /> View Material Inventory
+              </Button>
+              <Button variant="primary" size="sm" onClick={() => onNavigateToScreen('marketplace')}>
+                <ShoppingBag className="w-4 h-4 mr-1" /> Open Recovery Market
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

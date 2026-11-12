@@ -267,6 +267,7 @@ export const App: React.FC = () => {
         <DashboardScreen
           projects={projects}
           summary={summary}
+          userRole={user.role}
           onNavigateToScreen={navigateTo}
         />
       )}
