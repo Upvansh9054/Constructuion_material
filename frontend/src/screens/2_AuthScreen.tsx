@@ -9,13 +9,12 @@ import { apiClient } from '../lib/api-client';
 interface AuthScreenProps {
   initialMode?: 'login' | 'register';
   onLoginSuccess: (userData: { email: string; role: string; name: string }) => void;
-  onBackToLanding: () => void;
+  onBackToLanding?: () => void;
 }
 
 export const AuthScreen: React.FC<AuthScreenProps> = ({
   initialMode = 'login',
   onLoginSuccess,
-  onBackToLanding,
 }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [email, setEmail] = useState('contractor@apex-demolition.com');
@@ -103,22 +102,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-4 sm:p-6 font-sans">
       <div className="flex items-center justify-between max-w-5xl mx-auto w-full py-2">
-        <button
-          onClick={onBackToLanding}
-          className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-white transition-colors"
-        >
+        <div className="flex items-center gap-2.5 text-xs text-slate-400">
           <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-slate-950 font-bold">
             <ShieldCheck className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold text-white text-sm">Demolition Intelligence</span>
-        </button>
-
-        <button
-          onClick={onBackToLanding}
-          className="text-xs text-slate-400 hover:text-white underline underline-offset-4"
-        >
-          ← Return to Public Portal
-        </button>
+        </div>
       </div>
 
       <div className="max-w-md mx-auto w-full py-8">
