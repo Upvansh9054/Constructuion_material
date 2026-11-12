@@ -58,7 +58,6 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   activeScreen,
   onSelectScreen,
-  unreadCount = 2,
   userRole = 'CONTRACTOR',
   onLogout,
 }) => {
@@ -72,8 +71,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         title: 'Material Procurement',
         items: [
-          { id: 'marketplace', label: 'Recovery Market (Lots)', icon: ShoppingBag, badge: '4' },
-          { id: 'inventory', label: 'Verified Material Stock', icon: Layers, badge: '9' },
+          { id: 'marketplace', label: 'Recovery Market (Lots)', icon: ShoppingBag },
+          { id: 'inventory', label: 'Verified Material Stock', icon: Layers },
           { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
         ],
       },
@@ -87,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         title: 'Buyer Portal',
         items: [
-          { id: 'notifications', label: 'Bids & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
+          { id: 'notifications', label: 'Bids & Notices', icon: Bell },
           { id: 'settings', label: 'Buyer Profile & Logistics', icon: Settings },
         ],
       },
@@ -99,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { id: 'upload', label: 'Site Media Upload', icon: Camera },
           { id: 'analysis', label: 'AI Material Vision', icon: Cpu },
-          { id: 'inventory', label: 'Material Inventory', icon: Layers, badge: '9' },
+          { id: 'inventory', label: 'Material Inventory', icon: Layers },
           { id: 'assessment', label: 'Quantity & Condition', icon: Sliders },
         ],
       },
@@ -108,13 +107,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
           { id: 'reports', label: 'DMAR Compliance Reports', icon: FileText },
-          { id: 'projects', label: 'Demolition Sites', icon: Building2, badge: '5' },
+          { id: 'projects', label: 'Demolition Sites', icon: Building2 },
         ],
       },
       {
         title: 'System & Platform',
         items: [
-          { id: 'notifications', label: 'Hazard & Audit Alerts', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
+          { id: 'notifications', label: 'Hazard & Audit Alerts', icon: Bell },
           { id: 'settings', label: 'Surveyor Settings', icon: Settings },
         ],
       },
@@ -126,21 +125,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         title: 'Site Operations',
         items: [
           { id: 'dashboard', label: 'Main Dashboard', icon: LayoutDashboard },
-          { id: 'projects', label: 'Demolition Sites', icon: Building2, badge: '5' },
+          { id: 'projects', label: 'Demolition Sites', icon: Building2 },
           { id: 'create-project', label: 'Register New Site', icon: PlusCircle },
         ],
       },
       {
         title: 'Material Assets & Weighbridge',
         items: [
-          { id: 'inventory', label: 'Material Inventory & Scale', icon: Layers, badge: '9' },
+          { id: 'inventory', label: 'Material Inventory & Scale', icon: Layers },
           { id: 'recovery', label: 'Recovery Valuation & Carbon', icon: DollarSign },
         ],
       },
       {
         title: 'Circular Commerce',
         items: [
-          { id: 'marketplace', label: 'Recovery Market (Lots)', icon: ShoppingBag, badge: '4' },
+          { id: 'marketplace', label: 'Recovery Market (Lots)', icon: ShoppingBag },
           { id: 'buyers', label: 'Certified Off-Takers', icon: Users },
           { id: 'reports', label: 'DMAR Compliance Reports', icon: FileText },
         ],
@@ -148,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         title: 'System & Platform',
         items: [
-          { id: 'notifications', label: 'Alerts & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
+          { id: 'notifications', label: 'Alerts & Notices', icon: Bell },
           { id: 'settings', label: 'Contractor Profile', icon: Settings },
         ],
       },

@@ -62,10 +62,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
-          title="Step 1: Drone Upload & AI Material Localization"
+          title="Drone Upload & AI Material Localization"
         >
           <Camera className="w-3.5 h-3.5" />
-          <span>1. Surveyor</span>
+          <span>Surveyor</span>
         </button>
 
         <button
@@ -76,10 +76,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
-          title="Step 2: Operations, Weighbridge Scaling & DMAR Reports"
+          title="Operations, Weighbridge Scaling & DMAR Reports"
         >
           <HardHat className="w-3.5 h-3.5" />
-          <span>2. Contractor</span>
+          <span>Contractor</span>
         </button>
 
         <button
@@ -90,10 +90,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
-          title="Step 3: Secondary Material Procurement & Off-Taker Bidding"
+          title="Secondary Material Procurement & Off-Taker Bidding"
         >
           <Building className="w-3.5 h-3.5" />
-          <span>3. Buyer</span>
+          <span>Buyer</span>
         </button>
       </div>
 
