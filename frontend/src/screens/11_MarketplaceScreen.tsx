@@ -15,6 +15,7 @@ import {
   Truck,
   PlusCircle,
   CheckCircle2,
+  Scale,
 } from 'lucide-react';
 
 interface MarketplaceScreenProps {
@@ -171,66 +172,109 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
 
       {/* Material Lots Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredListings.map((listing) => (
-          <Card key={listing.id} className="flex flex-col justify-between hover:border-slate-700 transition-all">
-            <div>
-              <div className="flex items-start justify-between gap-2">
-                <Badge variant={listing.status === 'ACTIVE' ? 'success' : 'outline'}>
-                  {listing.status}
-                </Badge>
-                <div className="text-right">
-                  <div className="text-base font-bold text-emerald-400 font-mono">
-                    {formatCurrency(listing.price_per_tonne_usd)}
-                    <span className="text-xs text-slate-400 font-normal"> / t</span>
+        {filteredListings.map((listing) => {
+          const linkedMaterial = materials.find((m) => m.id === listing.material_item_id);
+          const hasWeighbridge = linkedMaterial?.verified_weight_tonnes !== undefined && linkedMaterial.verified_weight_tonnes !== null;
+          const certifiedMass = hasWeighbridge ? linkedMaterial.verified_weight_tonnes! : listing.available_tonnes;
+          const certifiedTotalValue = Math.round(certifiedMass * listing.price_per_tonne_usd);
+
+          return (
+            <Card
+              key={listing.id}
+              className={`flex flex-col justify-between hover:border-slate-700 transition-all ${
+                hasWeighbridge ? 'border-emerald-900/50 bg-slate-900/90' : ''
+              }`}
+            >
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Badge variant={listing.status === 'ACTIVE' ? 'success' : 'outline'}>
+                      {listing.status}
+                    </Badge>
+                    {hasWeighbridge && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800">
+                        <Scale className="w-3 h-3 text-emerald-400" />
+                        Weighbridge Certified: {linkedMaterial.weighbridge_ticket_number}
+                      </span>
+                    )}
                   </div>
+                  <div className="text-right">
+                    <div className="text-base font-bold text-emerald-400 font-mono">
+                      {formatCurrency(listing.price_per_tonne_usd)}
+                      <span className="text-xs text-slate-400 font-normal"> / t</span>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 className="text-base font-bold text-white mt-3 leading-snug">{listing.title}</h3>
+                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{listing.description}</p>
+
+                <div className="mt-4 space-y-2 text-xs">
+                  <div className="flex items-center justify-between p-2 rounded bg-slate-800/60">
+                    <span className="text-slate-400">Available Mass:</span>
+                    <div className="text-right font-mono">
+                      <span className="font-bold text-white">{formatTonnes(certifiedMass)}</span>
+                      {hasWeighbridge && (
+                        <span className="text-[10px] text-emerald-400 block font-semibold">
+                          Certified Plant Scale ({linkedMaterial.weighbridge_ticket_number})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded bg-slate-800/60">
+                    <span className="text-slate-400">Total Lot Value:</span>
+                    <span className="font-bold text-emerald-400 font-mono">{formatCurrency(certifiedTotalValue)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-slate-400 pt-1 text-[11px]">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span className="truncate">{listing.pickup_city} • {listing.pickup_address}</span>
+                  </div>
+
+                  {listing.logistics_notes && (
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                      <Truck className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <span className="truncate">{listing.logistics_notes}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <h3 className="text-base font-bold text-white mt-3 leading-snug">{listing.title}</h3>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-2">{listing.description}</p>
-
-              <div className="mt-4 space-y-2 text-xs">
-                <div className="flex items-center justify-between p-2 rounded bg-slate-800/60">
-                  <span className="text-slate-400">Available Mass:</span>
-                  <span className="font-bold text-white font-mono">{formatTonnes(listing.available_tonnes)}</span>
-                </div>
-
-                <div className="flex items-center justify-between p-2 rounded bg-slate-800/60">
-                  <span className="text-slate-400">Total Lot Value:</span>
-                  <span className="font-bold text-emerald-400 font-mono">{formatCurrency(listing.total_price_usd)}</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-slate-400 pt-1 text-[11px]">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">{listing.pickup_city} • {listing.pickup_address}</span>
-                </div>
-
-                {listing.logistics_notes && (
-                  <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-                    <Truck className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-                    <span className="truncate">{listing.logistics_notes}</span>
+              <div className="mt-5 pt-3 border-t border-slate-800 flex items-center gap-2">
+                {isBuyer ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => {
+                      setActiveBidModal(listing);
+                      setBidPricePerTonne(listing.price_per_tonne_usd.toString());
+                      setBidQuantityTonnes(certifiedMass.toString());
+                    }}
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5 mr-1" />
+                    Place Purchase Bid / Quote
+                  </Button>
+                ) : (
+                  <div className="w-full flex items-center justify-between text-xs">
+                    <span className="text-emerald-400 font-semibold flex items-center gap-1 text-[11px]">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Published by Contractor
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-[11px] h-7 px-2 border-slate-700 hover:bg-slate-800"
+                      onClick={() => onNavigateToScreen('inventory')}
+                    >
+                      View in Inventory ➔
+                    </Button>
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="mt-5 pt-3 border-t border-slate-800 flex items-center gap-2">
-              <Button
-                variant="primary"
-                size="sm"
-                className="w-full text-xs"
-                onClick={() => {
-                  setActiveBidModal(listing);
-                  setBidPricePerTonne(listing.price_per_tonne_usd.toString());
-                  setBidQuantityTonnes(listing.available_tonnes.toString());
-                }}
-              >
-                <ShoppingBag className="w-3.5 h-3.5 mr-1" />
-                Place Purchase Bid / Quote
-              </Button>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Place Bid Dialog */}
