@@ -273,7 +273,7 @@ export const App: React.FC = () => {
             navigateTo('dashboard');
           }
         }}
-        onBackToLanding={() => navigateTo('landing')}
+        onBackToLanding={() => navigateTo('dashboard')}
       />
     );
   }
@@ -285,7 +285,7 @@ export const App: React.FC = () => {
       onSelectScreen={navigateTo}
       unreadCount={unreadCount}
       user={user}
-      onLogout={() => navigateTo('landing')}
+      onLogout={() => navigateTo('auth')}
       onSwitchRole={handleSwitchRole}
     >
       {/* 3. Main Dashboard */}

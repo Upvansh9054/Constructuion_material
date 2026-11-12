@@ -13,7 +13,6 @@ import {
   FileText,
   Bell,
   Settings,
-  Globe,
   LogOut,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -90,7 +89,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { id: 'notifications', label: 'Bids & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
           { id: 'settings', label: 'Buyer Profile & Logistics', icon: Settings },
-          { id: 'landing', label: 'Public Portal', icon: Globe },
         ],
       },
     ];
@@ -118,7 +116,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { id: 'notifications', label: 'Hazard & Audit Alerts', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
           { id: 'settings', label: 'Surveyor Settings', icon: Settings },
-          { id: 'landing', label: 'Public Portal', icon: Globe },
         ],
       },
     ];
@@ -153,7 +150,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { id: 'notifications', label: 'Alerts & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
           { id: 'settings', label: 'Contractor Profile', icon: Settings },
-          { id: 'landing', label: 'Public Portal', icon: Globe },
         ],
       },
     ];
