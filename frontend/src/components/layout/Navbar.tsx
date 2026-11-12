@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Bell, User, Camera, HardHat, Building } from 'lucide-react';
+import { ShieldCheck, Bell, User, Activity } from 'lucide-react';
 import { NavScreenId } from './Sidebar';
 
 interface NavbarProps {
@@ -13,11 +13,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigateToScreen,
   unreadCount = 2,
   user,
-  onSwitchRole,
 }) => {
   const isBuyer = user.role === 'BUYER' || user.role === 'MATERIAL_BUYER';
   const isSurveyor = user.role === 'SURVEYOR';
-  const isContractor = !isBuyer && !isSurveyor;
 
   const handleBrandClick = () => {
     if (isBuyer) {
@@ -49,52 +47,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
       </div>
 
-      {/* Middle: 3-Stage Persona Switcher (Live Demo / Presentation Bar) */}
-      <div className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
-        <span className="text-[10px] uppercase font-bold text-slate-500 px-2 tracking-wider">
-          Workflow Persona:
-        </span>
-        <button
-          type="button"
-          onClick={() => onSwitchRole?.('SURVEYOR')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-            isSurveyor
-              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-          }`}
-          title="Drone Upload & AI Material Localization"
-        >
-          <Camera className="w-3.5 h-3.5" />
-          <span>Surveyor</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onSwitchRole?.('CONTRACTOR')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-            isContractor
-              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-          }`}
-          title="Operations, Weighbridge Scaling & DMAR Reports"
-        >
-          <HardHat className="w-3.5 h-3.5" />
-          <span>Contractor</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onSwitchRole?.('BUYER')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-            isBuyer
-              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-          }`}
-          title="Secondary Material Procurement & Off-Taker Bidding"
-        >
-          <Building className="w-3.5 h-3.5" />
-          <span>Buyer</span>
-        </button>
+      {/* Middle Telemetry Status */}
+      <div className="hidden lg:flex items-center gap-4">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300">
+          <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          <span className="font-mono text-[11px]">YOLOv8x Inference Engine: Operational</span>
+        </div>
       </div>
 
       {/* Right Controls */}
