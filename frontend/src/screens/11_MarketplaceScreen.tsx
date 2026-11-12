@@ -20,6 +20,8 @@ import {
 interface MarketplaceScreenProps {
   listings: MarketplaceListing[];
   materials: MaterialItem[];
+  userRole?: string;
+  onPlaceBid?: (listing: MarketplaceListing, tonnes: number, pricePerTonne: number) => void;
   onCreateListing: (newListing: MarketplaceListing) => void;
   onNavigateToScreen: (screen: string) => void;
 }
@@ -27,9 +29,12 @@ interface MarketplaceScreenProps {
 export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
   listings,
   materials,
+  userRole,
+  onPlaceBid,
   onCreateListing,
   onNavigateToScreen,
 }) => {
+  const isBuyer = userRole === 'BUYER' || userRole === 'MATERIAL_BUYER';
   const [search, setSearch] = useState('');
   const [cityFilter, setCityFilter] = useState('ALL');
   const [activeBidModal, setActiveBidModal] = useState<MarketplaceListing | null>(null);
@@ -91,6 +96,13 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
 
   const handlePlaceBid = (e: React.FormEvent) => {
     e.preventDefault();
+    if (activeBidModal && onPlaceBid) {
+      onPlaceBid(
+        activeBidModal,
+        parseFloat(bidQuantityTonnes) || 1,
+        parseFloat(bidPricePerTonne) || activeBidModal.price_per_tonne_usd
+      );
+    }
     setBidSuccessMessage(true);
     setTimeout(() => {
       setBidSuccessMessage(false);
@@ -103,21 +115,32 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Secondary Material Marketplace
-          </h2>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Secondary Material Marketplace
+            </h2>
+            {isBuyer && (
+              <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-[10px]">
+                Buyer Procurement Portal
+              </Badge>
+            )}
+          </div>
           <p className="text-xs text-slate-400">
-            Connect demolition contractors with certified material buyers, mini-mills, and reclamation yards
+            {isBuyer
+              ? 'Browse verified secondary demolition material streams, review certified scale tonnage, and place direct purchase bids'
+              : 'Connect demolition contractors with certified material buyers, mini-mills, and reclamation yards'}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => onNavigateToScreen('buyers')}>
-            Buyer Directory
+            Off-Taker Directory
           </Button>
-          <Button variant="primary" size="sm" onClick={() => setIsPublishModalOpen(true)}>
-            <PlusCircle className="w-4 h-4 mr-1.5" /> Publish Material Lot
-          </Button>
+          {!isBuyer && (
+            <Button variant="primary" size="sm" onClick={() => setIsPublishModalOpen(true)}>
+              <PlusCircle className="w-4 h-4 mr-1.5" /> Publish Material Lot
+            </Button>
+          )}
         </div>
       </div>
 

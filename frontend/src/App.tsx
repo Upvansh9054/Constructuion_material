@@ -172,6 +172,21 @@ export const App: React.FC = () => {
     setNotifications((prev) => [newNotif, ...prev]);
   };
 
+  const handleBuyerBid = (listing: MarketplaceListing, tonnes: number, pricePerTonne: number) => {
+    const total = Math.round(tonnes * pricePerTonne);
+    const newNotif: NotificationItem = {
+      id: `notif-${Date.now()}`,
+      type: 'BID_RECEIVED',
+      title: `Commercial Bid Submitted: $${total.toLocaleString()} USD`,
+      message: `${user.name} submitted a purchase bid of $${pricePerTonne}/t on ${tonnes}t of ${listing.title}.`,
+      timestamp: new Date().toISOString(),
+      is_read: false,
+      priority: 'HIGH',
+      link_screen: 'marketplace',
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
+
   const handleMarkAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
   };
@@ -225,7 +240,13 @@ export const App: React.FC = () => {
         initialMode={authMode}
         onLoginSuccess={(userData) => {
           setUser(userData);
-          navigateTo('dashboard');
+          if (userData.role === 'BUYER' || userData.role === 'MATERIAL_BUYER') {
+            navigateTo('marketplace');
+          } else if (userData.role === 'SURVEYOR') {
+            navigateTo('analysis');
+          } else {
+            navigateTo('dashboard');
+          }
         }}
         onBackToLanding={() => navigateTo('landing')}
       />
@@ -315,6 +336,8 @@ export const App: React.FC = () => {
         <MarketplaceScreen
           listings={listings}
           materials={materials}
+          userRole={user.role}
+          onPlaceBid={handleBuyerBid}
           onCreateListing={handleCreateListing}
           onNavigateToScreen={navigateTo}
         />

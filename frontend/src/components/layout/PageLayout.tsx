@@ -31,6 +31,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
           activeScreen={activeScreen}
           onSelectScreen={onSelectScreen}
           unreadCount={unreadCount}
+          userRole={user.role}
           onLogout={onLogout}
         />
         <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-950/90 scrollbar-thin scrollbar-thumb-slate-800">

@@ -52,6 +52,7 @@ interface SidebarProps {
   activeScreen: NavScreenId;
   onSelectScreen: (screen: NavScreenId) => void;
   unreadCount?: number;
+  userRole?: string;
   onLogout?: () => void;
 }
 
@@ -59,44 +60,107 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeScreen,
   onSelectScreen,
   unreadCount = 2,
+  userRole = 'CONTRACTOR',
   onLogout,
 }) => {
-  const navSections: NavSection[] = [
-    {
-      title: 'Operations Overview',
-      items: [
-        { id: 'dashboard', label: 'Main Dashboard', icon: LayoutDashboard },
-        { id: 'projects', label: 'Demolition Sites', icon: Building2, badge: '5' },
-        { id: 'create-project', label: 'Register New Site', icon: PlusCircle },
-        { id: 'upload', label: 'Site Media Upload', icon: Camera },
-      ],
-    },
-    {
-      title: 'AI Intelligence & Scans',
-      items: [
-        { id: 'analysis', label: 'AI Material Vision', icon: Cpu },
-        { id: 'inventory', label: 'Material Inventory', icon: Layers, badge: '9' },
-        { id: 'assessment', label: 'Quantity & Condition', icon: Sliders },
-        { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
-      ],
-    },
-    {
-      title: 'Circular Commerce',
-      items: [
-        { id: 'marketplace', label: 'Recovery Market', icon: ShoppingBag, badge: '4' },
-        { id: 'buyers', label: 'Certified Off-Takers', icon: Users },
-        { id: 'reports', label: 'DMAR Compliance Reports', icon: FileText },
-      ],
-    },
-    {
-      title: 'System & Platform',
-      items: [
-        { id: 'notifications', label: 'Alerts & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
-        { id: 'settings', label: 'Profile & Settings', icon: Settings },
-        { id: 'landing', label: 'Public Portal', icon: Globe },
-      ],
-    },
-  ];
+  const isBuyer = userRole === 'BUYER' || userRole === 'MATERIAL_BUYER';
+  const isSurveyor = userRole === 'SURVEYOR';
+
+  let navSections: NavSection[] = [];
+
+  if (isBuyer) {
+    navSections = [
+      {
+        title: 'Material Procurement',
+        items: [
+          { id: 'marketplace', label: 'Recovery Market (Lots)', icon: ShoppingBag, badge: '4' },
+          { id: 'inventory', label: 'Verified Material Stock', icon: Layers, badge: '9' },
+          { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
+        ],
+      },
+      {
+        title: 'Off-Taker Network',
+        items: [
+          { id: 'buyers', label: 'Certified Off-Takers', icon: Users },
+          { id: 'reports', label: 'DMAR Compliance Audits', icon: FileText },
+        ],
+      },
+      {
+        title: 'Buyer Portal',
+        items: [
+          { id: 'notifications', label: 'Bids & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
+          { id: 'settings', label: 'Buyer Profile & Logistics', icon: Settings },
+          { id: 'landing', label: 'Public Portal', icon: Globe },
+        ],
+      },
+    ];
+  } else if (isSurveyor) {
+    navSections = [
+      {
+        title: 'Field Engineering',
+        items: [
+          { id: 'upload', label: 'Site Media Upload', icon: Camera },
+          { id: 'analysis', label: 'AI Material Vision', icon: Cpu },
+          { id: 'inventory', label: 'Material Inventory', icon: Layers, badge: '9' },
+          { id: 'assessment', label: 'Quantity & Condition', icon: Sliders },
+        ],
+      },
+      {
+        title: 'Audit & Compliance',
+        items: [
+          { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
+          { id: 'reports', label: 'DMAR Compliance Reports', icon: FileText },
+          { id: 'projects', label: 'Demolition Sites', icon: Building2, badge: '5' },
+        ],
+      },
+      {
+        title: 'System & Platform',
+        items: [
+          { id: 'notifications', label: 'Hazard & Audit Alerts', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
+          { id: 'settings', label: 'Surveyor Settings', icon: Settings },
+          { id: 'landing', label: 'Public Portal', icon: Globe },
+        ],
+      },
+    ];
+  } else {
+    // Demolition Contractor / Admin (Full Access)
+    navSections = [
+      {
+        title: 'Operations Overview',
+        items: [
+          { id: 'dashboard', label: 'Main Dashboard', icon: LayoutDashboard },
+          { id: 'projects', label: 'Demolition Sites', icon: Building2, badge: '5' },
+          { id: 'create-project', label: 'Register New Site', icon: PlusCircle },
+          { id: 'upload', label: 'Site Media Upload', icon: Camera },
+        ],
+      },
+      {
+        title: 'AI Intelligence & Scans',
+        items: [
+          { id: 'analysis', label: 'AI Material Vision', icon: Cpu },
+          { id: 'inventory', label: 'Material Inventory', icon: Layers, badge: '9' },
+          { id: 'assessment', label: 'Quantity & Condition', icon: Sliders },
+          { id: 'recovery', label: 'Value & Carbon Math', icon: DollarSign },
+        ],
+      },
+      {
+        title: 'Circular Commerce',
+        items: [
+          { id: 'marketplace', label: 'Recovery Market', icon: ShoppingBag, badge: '4' },
+          { id: 'buyers', label: 'Certified Off-Takers', icon: Users },
+          { id: 'reports', label: 'DMAR Compliance Reports', icon: FileText },
+        ],
+      },
+      {
+        title: 'System & Platform',
+        items: [
+          { id: 'notifications', label: 'Alerts & Notices', icon: Bell, badge: unreadCount > 0 ? `${unreadCount}` : undefined, badgeCritical: true },
+          { id: 'settings', label: 'Profile & Settings', icon: Settings },
+          { id: 'landing', label: 'Public Portal', icon: Globe },
+        ],
+      },
+    ];
+  }
 
   return (
     <aside className="w-64 border-r border-slate-800 bg-slate-900/40 flex flex-col justify-between overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 flex-shrink-0">
